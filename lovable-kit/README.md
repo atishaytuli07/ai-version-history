@@ -12,7 +12,7 @@ Take v2.4.1:
 
 - The first number (2) goes up for a big change, like a redesign.
 - The second number (4) goes up for a new feature, like a new page or section.
-- The last number (1) goes up for a small fix, like new text or a colour.
+- The last number (1) goes up for a small fix, like new text or a color.
 
 When you go back to an older version, the middle number goes up. Your newer versions are all still there.
 

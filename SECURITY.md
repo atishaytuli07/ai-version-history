@@ -12,7 +12,7 @@ You'll get a reply within a week.
 
 ## What this kit can change
 
-- Lovable Lite saves your version list in a table in your app's database. Anyone with your app's public key can read that table, so don't use Lite for private work.
+- Lovable Lite saves your version list in a table in your app's database. Anyone with your app's public key can read that table and add to it, so don't use Lite for private work.
 - The GitHub files (Lovable Pro, Bolt, v0) run in your repository and can add commits and version tags.
 - The skill runs a small Python program on your computer. It reads and writes files in your project folder.
 

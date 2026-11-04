@@ -35,7 +35,7 @@ You'll choose one of two setups:
 | How you go back | With Lovable's History button | Type "go back to v3.4.5" in Lovable's chat |
 | Good for | Trying it out, small personal projects | Real projects, private projects |
 
-With Lite, anyone who knows your app's public key can read your version list. Don't use Lite for private work.
+With Lite, anyone who knows your app's public key can read your version list and add versions to it. Don't use Lite for private work.
 
 ### Bolt or v0
 
@@ -55,7 +55,7 @@ Then just ask your AI: "show me the versions", "what changed in v1.3.0?" or "go 
 
 ### ChatGPT, Gemini and other chats
 
-Copy the text in [chat-mode-rules.md](skills/versioning-ai-work/assets/rules/chat-mode-rules.md) and paste it at the start of a chat. The AI will number each change it makes.
+Copy the text in [chat-mode-rules.md](skills/versioning-ai-work/assets/rules/chat-mode-rules.md) and paste it at the start of a chat, or into your chat app's custom instructions. The AI will number each change it makes.
 
 ## What the numbers mean
 
@@ -63,7 +63,7 @@ Take v2.4.1:
 
 - The first number (2) goes up for a big change, like a redesign.
 - The second number (4) goes up for a new feature, like a new page or section.
-- The last number (1) goes up for a small fix, like new text or a colour.
+- The last number (1) goes up for a small fix, like new text or a color.
 
 ## Before you start
 
@@ -87,4 +87,4 @@ Please open an [issue](https://github.com/atishaytuli07/ai-version-history/issue
 
 ## License
 
-[MIT](LICENSE). Copyright 2026 Atishay Tuli.
+[MIT](LICENSE). Copyright 2026 AI Best Prompts.
