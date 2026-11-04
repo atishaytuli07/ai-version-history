@@ -26,6 +26,8 @@ Your visitors never see the button. Only you do, in the preview.
 2. Open the `lovable-kit` folder and double-click `START-HERE.html`. It opens in your browser.
 3. Follow the steps on that page. Each step has a **Copy** button, so you just copy and paste into Lovable.
 
+It has been tested live in Lovable apps made before May 13, 2026. Apps made since then use a newer setup (TanStack Start). The steps cover both, but the newer setup hasn't been tested live yet.
+
 You'll choose one of two setups:
 
 | | Lite | Pro |

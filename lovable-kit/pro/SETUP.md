@@ -17,7 +17,7 @@ Before you start, have these ready:
 *Skip this step if your project is already connected to GitHub.*
 
 1. In Lovable, open your project.
-2. Open **Settings → Connectors → GitHub**. Or click the GitHub button in the editor.
+2. Open **Project settings → Git → GitHub**.
 3. Follow the steps on the screen.
 
 **You should see:** a new repository (repo) on GitHub with your project's code. A repo is your project's folder on GitHub.
@@ -92,7 +92,7 @@ Without this step, anyone with access to the repo can delete a version. With it,
 
 ## Step 5: Teach Lovable the rules
 
-1. In Lovable, open **Project Settings → Knowledge**.
+1. In Lovable, open **Project settings → Instructions**.
 2. Paste everything from `LOVABLE-KNOWLEDGE.md`.
 3. Save.
 
@@ -105,7 +105,7 @@ Without this step, anyone with access to the repo can delete a version. With it,
 Send this message in Lovable's chat:
 
 ```text
-In src/App.tsx, add import VersionPill from "./components/VersionPill"; and render <VersionPill /> once, just before the closing tag of the outermost element that App returns. Don't change src/components/VersionPill.tsx.
+Render <VersionPill /> from src/components/VersionPill.tsx once in the app's root layout, so it shows on every page, and add the import for it there. In apps with src/routes/__root.tsx, put it in the root route next to <Outlet />. In older apps with src/App.tsx, put it just before the closing tag of the outermost element that App returns. Don't change src/components/VersionPill.tsx.
 ```
 
 **You should see:** after about a minute, a small button like `v1.0.1` in the bottom-left corner of the preview. Click it to see your versions.
@@ -148,7 +148,7 @@ For everyday use, see `HOW-TO-USE.md`. Two things to keep in mind:
 | A red cross that mentions "Restrict creations" | Turn **Restrict creations** off in Step 4's ruleset. Then click **Re-run jobs**. |
 | No version button in the preview | Send Step 6's message again. Or add `?versions=on` to the end of the preview link. |
 | The button says "The version list isn't here yet" | Wait a minute for the green check in Actions. Then open the button again. |
-| Every change says "Small tweak" | Check that Step 5's text is saved in Knowledge. |
+| Every change says "Small tweak" | Check that Step 5's text is saved in Instructions. |
 | Versioning stopped after you used Lovable's History | Add the 6 files again (Step 3). |
 
 ---

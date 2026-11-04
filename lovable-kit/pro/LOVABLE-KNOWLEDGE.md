@@ -29,7 +29,7 @@ When the user asks to go back to a version ("go back to v3.4.5", "undo the redes
 ## Rules
 
 - Never edit or delete `.github/`, `public/ai-versions.json`, `src/components/VersionPill.tsx`, or anything else in `.ai-versions/`, except `pending.json` and `restore.json` as described above.
-- Keep `<VersionPill />` rendered once in `src/App.tsx`. It only shows in the preview, never on the live site.
+- Keep `<VersionPill />` rendered once in the root layout (`src/routes/__root.tsx`, or `src/App.tsx` in older apps). It only shows in the preview, never on the live site.
 - Never invent version numbers. GitHub assigns them about a minute after each change.
 - If the user says a level was wrong ("that was major"), use their judgment for similar changes from now on and mention it in `reason`.
 - Commits named "Update version list" or "Restore vX (asked in chat)" are automatic. Never treat them as user changes.

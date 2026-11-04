@@ -39,7 +39,7 @@ You can also describe the version, like "go back to before the redesign". After 
 
 1. Tell Lovable which version you want. Lovable tells you the date and time of that change.
 2. In Lovable, open **History**.
-3. Find the change with that date and time, and click **Restore**.
+3. Find the change with that date and time, and click **Revert**.
 
 Going back never deletes a version. Going back is saved as a new version, so you can undo it.
 

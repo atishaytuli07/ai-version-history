@@ -77,7 +77,7 @@ Copying from the files yourself? Right-click the file and choose **Open with →
 Send this message. Under it, paste the contents of `4-VersionPill.tsx`.
 
 ```text
-Create src/components/VersionPill.tsx with exactly this content. Then in src/App.tsx, add import VersionPill from "./components/VersionPill"; and render <VersionPill /> once, just before the closing tag of the outermost element that App returns. Don't change the content of VersionPill.tsx.
+Create src/components/VersionPill.tsx with exactly this content. Then render <VersionPill /> once in the app's root layout, so it shows on every page, and add the import for it there. In apps with src/routes/__root.tsx, put it in the root route next to <Outlet />. In older apps with src/App.tsx, put it just before the closing tag of the outermost element that App returns. Don't change the content of VersionPill.tsx.
 ```
 
 <!-- file: copy-paste/4-VersionPill.tsx -->
@@ -88,7 +88,7 @@ Create src/components/VersionPill.tsx with exactly this content. Then in src/App
 
 ## Step 5: Teach Lovable the rules
 
-1. In Lovable, open **Project Settings → Knowledge**.
+1. In Lovable, open **Project settings → Instructions**.
 2. Paste everything from `LOVABLE-KNOWLEDGE.md`.
 3. Save.
 
@@ -107,7 +107,7 @@ Send these messages one at a time. After each one, click the version button. New
 | Make the heading blue | Small tweak |
 | Add a pricing section with three plans | New feature |
 | Redesign the whole site in a dark, minimal style | Big change |
-| *In History, click Restore on the pricing section change* | Went back |
+| *In History, click Revert on the pricing section change* | Went back |
 
 > **Going back restores code, not data.** Database rows and uploaded files stay as they are. If a change added or changed database tables, going back can break the app, because the tables don't go back. If that happens, ask Lovable to fix it.
 
@@ -131,7 +131,7 @@ For everyday use, see `HOW-TO-USE.md`. One thing to keep in mind:
 | A message that says "Can't reach the versions table" | Check Step 2. Open the Database view. Is the `ai_versions` table there? |
 | Lovable reports a type error about `ai_versions` | Send: "Regenerate the database types and fix the type error in src/lib/ai-versions-store.ts" |
 | A change is missing from the list | Lovable's AI forgot to describe it. Send: "Update src/ai-version.ts for the change you just made." |
-| Every change says "Small tweak" | Check that Step 5's text is saved in Knowledge. |
+| Every change says "Small tweak" | Check that Step 5's text is saved in Instructions. |
 | A message that says "too many new versions in one minute" | Someone (or some code running over and over) added many versions quickly. Wait a minute. To remove unwanted rows, use **Manage → SQL editor**. |
 
 ---

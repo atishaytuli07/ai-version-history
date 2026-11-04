@@ -12,7 +12,7 @@ Most app builders can't run this skill's script, but several sync every change t
 
 | Builder | Approach | Why | Status |
 |---|---|---|---|
-| Lovable | GitHub layer | Two-way sync with the default branch | Tested live |
+| Lovable | GitHub layer | Two-way sync with the default branch | Tested live on apps made before May 13, 2026; newer (TanStack Start) apps not yet |
 | Bolt | GitHub layer | Commits working changes to the connected branch and pulls GitHub changes regularly | Beta: tell the user it hasn't been tested live yet |
 | v0 | GitHub layer on the v0 branch | v0 usually commits to its own branch (like `v0/main-abc123`), not to main | Beta: tell the user it hasn't been tested live yet |
 | Replit | Files mode | Replit Agent runs shell commands; put `assets/rules/files-mode-rules.md` in `replit.md` at the project root | Uses files mode |
@@ -50,7 +50,7 @@ Give the user `assets/rules/github-layer-rules.md` to paste:
 
 | Builder | Where |
 |---|---|
-| Lovable | Project Settings → Knowledge |
+| Lovable | Project settings → Instructions |
 | Bolt | Project settings → Knowledge (applies to that project) |
 | v0 | **+** in the prompt bar → Instructions → New Instruction, then keep it checked. v0 instructions are saved to the account, so they apply to every project while checked. |
 

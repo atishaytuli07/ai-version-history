@@ -67,6 +67,7 @@ em{color:var(--muted)}
 <li>On GitHub you can lock versions so they can't be deleted. For a private repo this needs a paid GitHub plan.</li>
 </ul>
 <p>Pick one per project. If you already use GitHub, pick Pro.</p>
+<p>It has been tested live in Lovable apps made before May 13, 2026. Apps made since then use a newer setup (TanStack Start). The steps cover both, but the newer setup hasn't been tested live yet.</p>
 <h2 id="good-to-know-before-you-start">Before you start</h2>
 <ul>
 <li>Going back never deletes a version. Your history stays until you delete it. Keep a backup of anything important.</li>
@@ -260,7 +261,7 @@ export const aiVersion = {
 <hr />
 <h2 id="step-4-add-the-version-button">Step 4: Add the version button</h2>
 <p>Send this message. Under it, paste the contents of <code>4-VersionPill.tsx</code>.</p>
-<pre><code class="language-text">Create src/components/VersionPill.tsx with exactly this content. Then in src/App.tsx, add import VersionPill from &quot;./components/VersionPill&quot;; and render &lt;VersionPill /&gt; once, just before the closing tag of the outermost element that App returns. Don't change the content of VersionPill.tsx.
+<pre><code class="language-text">Create src/components/VersionPill.tsx with exactly this content. Then render &lt;VersionPill /&gt; once in the app's root layout, so it shows on every page, and add the import for it there. In apps with src/routes/__root.tsx, put it in the root route next to &lt;Outlet /&gt;. In older apps with src/App.tsx, put it just before the closing tag of the outermost element that App returns. Don't change the content of VersionPill.tsx.
 </code></pre>
 <details class="file"><summary>Show <code>4-VersionPill.tsx</code> to copy</summary><pre><code>// VersionPill: a small version badge with a timeline dropdown.
 // Works in two modes, picked automatically:
@@ -678,7 +679,7 @@ export default function VersionPill() {
 <hr />
 <h2 id="step-5-teach-lovable-the-rules">Step 5: Teach Lovable the rules</h2>
 <ol>
-<li>In Lovable, open <strong>Project Settings → Knowledge</strong>.</li>
+<li>In Lovable, open <strong>Project settings → Instructions</strong>.</li>
 <li>Paste everything from <code>LOVABLE-KNOWLEDGE.md</code>.</li>
 <li>Save.</li>
 </ol>
@@ -706,14 +707,14 @@ Rules:
 - Every change needs a fresh `src/ai-version.ts` with a new `id` and a description of that change. A change without it gets no version.
 - Leave `prompt` empty. Prompts are only saved if a rule below asks for it, because anyone with the app&#x27;s public key can read the version list.
 - Never edit `src/components/VersionPill.tsx` or `src/lib/ai-versions-store.ts`. Never change, delete or drop the `ai_versions` table or its rows.
-- Keep `&lt;VersionPill /&gt;` rendered once in `src/App.tsx`. It only shows in preview, never on the live site.
+- Keep `&lt;VersionPill /&gt;` rendered once in the root layout (`src/routes/__root.tsx`, or `src/App.tsx` in older apps). It only shows in preview, never on the live site.
 - Never invent version numbers. The version pill assigns them.
 - If the user says a level was wrong (&quot;that was major&quot;), use their judgment for similar changes from now on and mention it in `reason`.
 
 ## Going back to a version
 
 - Don&#x27;t rewrite old code from memory. Going back is done with Lovable&#x27;s History → Restore.
-- If the user names a version (&quot;go back to v3.4.5&quot;) or describes one (&quot;before the redesign&quot;), find it in the version pill&#x27;s list (the `ai_versions` table), then tell them its summary and the date and time it was saved, so they can pick the matching change in History and click Restore. If more than one version could match, ask which.
+- If the user names a version (&quot;go back to v3.4.5&quot;) or describes one (&quot;before the redesign&quot;), find it in the version pill&#x27;s list (the `ai_versions` table), then tell them its summary and the date and time it was saved, so they can pick the matching change in History and click Revert. If more than one version could match, ask which.
 - After a restore, treat the restored code as the truth. Don&#x27;t re-apply changes from versions after the restored one unless the user asks for them again.
 </code></pre></details>
 <p>Do this step last. If Lovable gets the rules earlier, it may change the files from Steps 3 and 4.</p>
@@ -741,7 +742,7 @@ Rules:
 <td>Big change</td>
 </tr>
 <tr>
-<td><em>In History, click Restore on the pricing section change</em></td>
+<td><em>In History, click Revert on the pricing section change</em></td>
 <td>Went back</td>
 </tr>
 </tbody>
@@ -784,7 +785,7 @@ Rules:
 </tr>
 <tr>
 <td>Every change says "Small tweak"</td>
-<td>Check that Step 5's text is saved in Knowledge.</td>
+<td>Check that Step 5's text is saved in Instructions.</td>
 </tr>
 <tr>
 <td>A message that says "too many new versions in one minute"</td>
@@ -812,7 +813,7 @@ Rules:
 <p><em>Skip this step if your project is already connected to GitHub.</em></p>
 <ol>
 <li>In Lovable, open your project.</li>
-<li>Open <strong>Settings → Connectors → GitHub</strong>. Or click the GitHub button in the editor.</li>
+<li>Open <strong>Project settings → Git → GitHub</strong>.</li>
 <li>Follow the steps on the screen.</li>
 </ol>
 <p class="check"><strong>You should see:</strong> a new repository (repo) on GitHub with your project's code. A repo is your project's folder on GitHub.</p>
@@ -1758,7 +1759,7 @@ jobs:
 <hr />
 <h2 id="step-5-teach-lovable-the-rules">Step 5: Teach Lovable the rules</h2>
 <ol>
-<li>In Lovable, open <strong>Project Settings → Knowledge</strong>.</li>
+<li>In Lovable, open <strong>Project settings → Instructions</strong>.</li>
 <li>Paste everything from <code>LOVABLE-KNOWLEDGE.md</code>.</li>
 <li>Save.</li>
 </ol>
@@ -1793,7 +1794,7 @@ When the user asks to go back to a version (&quot;go back to v3.4.5&quot;, &quot
 ## Rules
 
 - Never edit or delete `.github/`, `public/ai-versions.json`, `src/components/VersionPill.tsx`, or anything else in `.ai-versions/`, except `pending.json` and `restore.json` as described above.
-- Keep `&lt;VersionPill /&gt;` rendered once in `src/App.tsx`. It only shows in the preview, never on the live site.
+- Keep `&lt;VersionPill /&gt;` rendered once in the root layout (`src/routes/__root.tsx`, or `src/App.tsx` in older apps). It only shows in the preview, never on the live site.
 - Never invent version numbers. GitHub assigns them about a minute after each change.
 - If the user says a level was wrong (&quot;that was major&quot;), use their judgment for similar changes from now on and mention it in `reason`.
 - Commits named &quot;Update version list&quot; or &quot;Restore vX (asked in chat)&quot; are automatic. Never treat them as user changes.
@@ -1801,7 +1802,7 @@ When the user asks to go back to a version (&quot;go back to v3.4.5&quot;, &quot
 <hr />
 <h2 id="step-6-add-the-version-button">Step 6: Add the version button</h2>
 <p>Send this message in Lovable's chat:</p>
-<pre><code class="language-text">In src/App.tsx, add import VersionPill from &quot;./components/VersionPill&quot;; and render &lt;VersionPill /&gt; once, just before the closing tag of the outermost element that App returns. Don't change src/components/VersionPill.tsx.
+<pre><code class="language-text">Render &lt;VersionPill /&gt; from src/components/VersionPill.tsx once in the app's root layout, so it shows on every page, and add the import for it there. In apps with src/routes/__root.tsx, put it in the root route next to &lt;Outlet /&gt;. In older apps with src/App.tsx, put it just before the closing tag of the outermost element that App returns. Don't change src/components/VersionPill.tsx.
 </code></pre>
 <p class="check"><strong>You should see:</strong> after about a minute, a small button like <code>v1.0.1</code> in the bottom-left corner of the preview. Click it to see your versions.</p>
 <hr />
@@ -1880,7 +1881,7 @@ When the user asks to go back to a version (&quot;go back to v3.4.5&quot;, &quot
 </tr>
 <tr>
 <td>Every change says "Small tweak"</td>
-<td>Check that Step 5's text is saved in Knowledge.</td>
+<td>Check that Step 5's text is saved in Instructions.</td>
 </tr>
 <tr>
 <td>Versioning stopped after you used Lovable's History</td>
@@ -1951,7 +1952,7 @@ When the user asks to go back to a version (&quot;go back to v3.4.5&quot;, &quot
 <ol>
 <li>Tell Lovable which version you want. Lovable tells you the date and time of that change.</li>
 <li>In Lovable, open <strong>History</strong>.</li>
-<li>Find the change with that date and time, and click <strong>Restore</strong>.</li>
+<li>Find the change with that date and time, and click <strong>Revert</strong>.</li>
 </ol>
 <p>Going back never deletes a version. Going back is saved as a new version, so you can undo it.</p>
 <blockquote>

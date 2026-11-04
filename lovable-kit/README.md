@@ -33,6 +33,8 @@ When you go back to an older version, the middle number goes up. Your newer vers
 
 Pick one per project. If you already use GitHub, pick Pro.
 
+It has been tested live in Lovable apps made before May 13, 2026. Apps made since then use a newer setup (TanStack Start). The steps cover both, but the newer setup hasn't been tested live yet.
+
 ## Before you start
 
 - Going back never deletes a version. Your history stays until you delete it. Keep a backup of anything important.
