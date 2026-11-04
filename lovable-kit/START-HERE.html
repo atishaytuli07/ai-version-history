@@ -1715,8 +1715,9 @@ export default function VersionPill({ src = &quot;/ai-versions.json&quot; }: { s
 </code></pre></details>
 <details class="file"><summary>Show <code>6-ai-versions.yml</code> to copy</summary><pre><code># Gives every change pushed to one branch its own permanent version tag and
 # release page, then refreshes public/ai-versions.json for the in-app version pill.
-# The branch is the repo&#x27;s default branch (Lovable, Bolt), unless you set the
-# repository variable AI_VERSIONS_BRANCH (for v0: the branch v0 commits to).
+# The branch is the repo&#x27;s default branch (Lovable, Bolt, and v0, which merges
+# each chat into it when you publish), unless you set the repository variable
+# AI_VERSIONS_BRANCH to use a different branch.
 name: AI Versions
 
 on:

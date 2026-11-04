@@ -29,7 +29,7 @@ Then, on GitHub:
 
 1. **Settings → Actions → General → Workflow permissions → Read and write permissions → Save.** Without this, versions can't be saved and runs fail with a 403 error.
 2. Optional but recommended: **Settings → Rules → Rulesets → New tag ruleset**, target pattern `v*`, turn on Restrict updates, Restrict deletions and Block force pushes. Leave Restrict creations off. Then versions can't be deleted or changed. Rulesets on private repos need a paid GitHub plan; without one, versions stay until someone deletes them, so suggest regular backups.
-3. **v0 only:** **Settings → Secrets and variables → Actions → Variables → New repository variable**, name `AI_VERSIONS_BRANCH`, value the branch v0 commits to (shown in v0's Git panel). Without it, versions are only made when changes reach the default branch.
+3. **v0:** don't add an `AI_VERSIONS_BRANCH` variable. v0 makes a branch for each chat and merges it into the default branch when the user clicks Publish, so each publish becomes one version.
 
 The first push after setup creates `v1.0.0`. Versions appear on the repo's Releases page and, with the pill, in the app preview.
 
