@@ -1,30 +1,43 @@
 # Lite setup (no GitHub)
 
-About 10 minutes, all inside Lovable. You'll send Lovable three messages and paste one block of text.
+This takes about 10 minutes, all inside Lovable. You will send Lovable three messages and paste one block of text.
 
-Your versions are saved in your project's database. Going back to old code in Lovable doesn't touch the database, so the version list survives a restore.
+Your versions are saved in your project's database (the place where your app keeps its data). When you go back to old code in Lovable, the database doesn't change. So your version list stays after a restore.
 
-**Is Lite right for this project?** The app reads and adds versions with its public key, and that key is in every copy of your published app. So anyone can read your version list (version numbers, summaries and dates) and add versions to it. The database blocks the worst cases: a new version must be the next number, texts are short, at most 20 a minute, and nobody can change or delete versions from the app. Prompts aren't saved. For anything private, use Pro.
+**Is Lite right for this project?** Read this first.
 
-**Before you start, have ready:**
+Your app reads and adds versions with its public key (the key your app uses to reach its database). This key is in every copy of your published app. So anyone can read your version list (version numbers, summaries and dates). Anyone can also add versions to it.
+
+The database blocks the worst cases:
+
+- A new version must have the next number.
+- Texts must be short.
+- At most 20 new versions can be added in a minute.
+- Nobody can change or delete versions from the app.
+
+Prompts aren't saved. For anything private, use Pro.
+
+Before you start, have these ready:
 
 - Your Lovable project
-- The kit, unzipped (see **Get the kit** on the first page)
+- The kit, unzipped (see "Get the kit" on the first page)
 
-*Menu names checked on 28 Oct 2026. If a button has moved, look for the same words nearby.*
+*Menu names in Lovable and GitHub can change. If a button has moved, look for the same words nearby.*
 
 ---
 
 ## Step 1: Turn on the database
 
+If your project already has a database, skip this step.
+
 1. In Lovable, open your project's **Database** view.
-2. If you see an **Enable** button, click it. If you already have a database, skip this step.
+2. If you see an **Enable** button, click it.
 
 ---
 
 ## Step 2: Create the versions table
 
-Send this message in Lovable's chat, and paste the contents of `1-ai-versions-table.sql` right under it:
+Send this message in Lovable's chat. Right under it, in the same message, paste the contents of `1-ai-versions-table.sql`.
 
 ```text
 Create a database table for version history using exactly this SQL. Keep the trigger and the row level security policies exactly as written.
@@ -32,9 +45,13 @@ Create a database table for version history using exactly this SQL. Keep the tri
 
 <!-- file: copy-paste/1-ai-versions-table.sql -->
 
-Lovable may warn that anyone can read or add rows to `ai_versions`. That's true, and it's what's described at the top of this page. The SQL limits what can be added; it can't make the list private.
+Lovable may warn that anyone can read or add rows (entries) to `ai_versions`. That's true. It is the risk described at the top of this page. The SQL (the database commands in the file) limits what can be added. It can't make the list private.
 
-*If Lovable won't run it:* open **Manage → SQL editor**, paste the same SQL, and click **Run**.
+If Lovable won't run the SQL:
+
+1. Open **Manage → SQL editor**.
+2. Paste the same SQL.
+3. Click **Run**.
 
 **You should see:** an `ai_versions` table in the Database view.
 
@@ -42,7 +59,7 @@ Lovable may warn that anyone can read or add rows to `ai_versions`. That's true,
 
 ## Step 3: Add two small files
 
-Send this message, and paste the contents of `2-ai-versions-store.ts` and `3-ai-version.ts` under it, each with its file name on the line above:
+Send this message. Under it, paste the contents of `2-ai-versions-store.ts` and `3-ai-version.ts`. Put each file's name on the line above its contents.
 
 ```text
 Create these two files with exactly this content: src/lib/ai-versions-store.ts and src/ai-version.ts. In ai-versions-store.ts, if this project's database client isn't exported as supabase from @/integrations/supabase/client, change only that import line to use this project's client. Don't change anything else.
@@ -51,13 +68,13 @@ Create these two files with exactly this content: src/lib/ai-versions-store.ts a
 <!-- file: copy-paste/2-ai-versions-store.ts -->
 <!-- file: copy-paste/3-ai-version.ts -->
 
-*Copying from the files yourself? Right-click and choose **Open with → Notepad** (Windows) or **TextEdit** (Mac).*
+Copying from the files yourself? Right-click the file and choose **Open with → Notepad** (Windows) or **TextEdit** (Mac).
 
 ---
 
 ## Step 4: Add the version button
 
-Send this message, and paste the contents of `4-VersionPill.tsx` under it:
+Send this message. Under it, paste the contents of `4-VersionPill.tsx`.
 
 ```text
 Create src/components/VersionPill.tsx with exactly this content. Then in src/App.tsx, add import VersionPill from "./components/VersionPill"; and render <VersionPill /> once, just before the closing tag of the outermost element that App returns. Don't change the content of VersionPill.tsx.
@@ -65,24 +82,25 @@ Create src/components/VersionPill.tsx with exactly this content. Then in src/App
 
 <!-- file: copy-paste/4-VersionPill.tsx -->
 
-**You should see:** when the preview reloads, a small button in the bottom-left corner. Click it: it shows **v1.0.0, Start**.
+**You should see:** a small button in the bottom-left corner after the preview reloads. Click it. It shows "v1.0.0, Start".
 
 ---
 
 ## Step 5: Teach Lovable the rules
 
-1. Open **Project Settings → Knowledge**.
-2. Paste everything from `LOVABLE-KNOWLEDGE.md` and save.
+1. In Lovable, open **Project Settings → Knowledge**.
+2. Paste everything from `LOVABLE-KNOWLEDGE.md`.
+3. Save.
 
 <!-- file: LOVABLE-KNOWLEDGE.md -->
 
-Do this last. If Lovable has the rules earlier, it may change the files from Steps 3 and 4.
+Do this step last. If Lovable gets the rules earlier, it may change the files from Steps 3 and 4.
 
 ---
 
 ## Step 6: Try it
 
-Send these one at a time. After each, click the version button. New versions show up as soon as the preview reloads.
+Send these messages one at a time. After each one, click the version button. New versions show up as soon as the preview reloads.
 
 | Send this | The button should show |
 |---|---|
@@ -91,9 +109,9 @@ Send these one at a time. After each, click the version button. New versions sho
 | Redesign the whole site in a dark, minimal style | Big change |
 | *In History, click Restore on the pricing section change* | Went back |
 
-> **Going back restores code, not data.** Database rows and uploaded files stay as they are. If a change added or changed database tables, going back can break the app, because the tables aren't rolled back. Ask Lovable to fix it afterwards.
+> **Going back restores code, not data.** Database rows and uploaded files stay as they are. If a change added or changed database tables, going back can break the app, because the tables don't go back. If that happens, ask Lovable to fix it.
 
-The exact numbers can differ. What matters is that every change shows up with a sensible label.
+Your version numbers may be different. What matters is that every change shows up with a label that fits it.
 
 ---
 
@@ -101,7 +119,7 @@ The exact numbers can differ. What matters is that every change shows up with a 
 
 For everyday use, see `HOW-TO-USE.md`. One thing to keep in mind:
 
-- **Don't go back to a version from before setup** (older than **Start**). That removes the version button and its files. If it happens, do Steps 3 and 4 again; your versions are still in the database.
+- **Don't go back to a version from before setup** (older than "Start"). That removes the version button and its files. If it happens, do Steps 3 and 4 again. Your versions are still in the database.
 
 ---
 
@@ -109,16 +127,17 @@ For everyday use, see `HOW-TO-USE.md`. One thing to keep in mind:
 
 | What you see | What to do |
 |---|---|
-| No version button in the preview | Send Step 4's message again, or add `?versions=on` to the end of the preview link |
-| "Can't reach the versions table" | Check Step 2: is `ai_versions` in the Database view? |
+| No version button in the preview | Send Step 4's message again. Or add `?versions=on` to the end of the preview link. |
+| A message that says "Can't reach the versions table" | Check Step 2. Open the Database view. Is the `ai_versions` table there? |
 | Lovable reports a type error about `ai_versions` | Send: "Regenerate the database types and fix the type error in src/lib/ai-versions-store.ts" |
 | A change is missing from the list | Lovable's AI forgot to describe it. Send: "Update src/ai-version.ts for the change you just made." |
-| Every change says "Small tweak" | Check that Step 5's text is saved in Knowledge |
-| "too many new versions in one minute" | Someone (or a loop) added many versions quickly. Wait a minute. To remove unwanted rows, use **Manage → SQL editor**. |
+| Every change says "Small tweak" | Check that Step 5's text is saved in Knowledge. |
+| A message that says "too many new versions in one minute" | Someone (or some code running over and over) added many versions quickly. Wait a minute. To remove unwanted rows, use **Manage → SQL editor**. |
 
 ---
 
 ## Good to know
 
-- **Versions are saved when the preview loads.** That happens right after every change. If you change something with the preview closed, the version appears the next time you open it. Your published site only reads the list; it never adds versions.
-- **Going back never deletes a version.** The list stays until you delete it. Deleting the project, or its database, deletes the list too.
+- Versions are saved when the preview loads. That happens right after every change. If you change something while the preview is closed, the version appears the next time you open the preview.
+- Your published site only reads the list. It never adds versions.
+- Going back never deletes a version. The list stays until you delete it. If you delete the project or its database, the list is deleted too.

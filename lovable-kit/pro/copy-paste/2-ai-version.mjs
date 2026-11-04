@@ -165,7 +165,7 @@ function publish(version, commit, info) {
   writeFileSync(notes, lines.join('\n\n') + '\n');
   try {
     execFileSync('gh', ['release', 'create', version, '--verify-tag',
-      '--title', `${version} — ${oneLine(info.summary, 80)}`, '--notes-file', notes],
+      '--title', `${version}: ${oneLine(info.summary, 80)}`, '--notes-file', notes],
       { stdio: ['ignore', 'pipe', 'pipe'] });
   } catch (e) {
     warnings.push(`Release page for ${version} failed (the version itself is saved): ${String(e.stderr || e.message).trim()}`);

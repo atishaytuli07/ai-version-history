@@ -1,23 +1,24 @@
 # Pro setup (with GitHub)
 
-About 15 minutes. You'll change one GitHub setting, add 6 files to GitHub, and send Lovable one message.
+This takes about 15 minutes. You will change one GitHub setting, add 6 files to GitHub, and send Lovable one message.
 
-**Before you start, have ready:**
+Before you start, have these ready:
 
 - Your Lovable project
-- A GitHub account
-- The kit, unzipped (see **Get the kit** on the first page)
+- A GitHub account (GitHub is a website that stores code)
+- The kit, unzipped (see "Get the kit" on the first page)
 
-*Menu names checked on 28 Oct 2026. If a button has moved, look for the same words nearby.*
+*Menu names in Lovable and GitHub can change. If a button has moved, look for the same words nearby.*
 
 ---
 
 ## Step 1: Connect Lovable to GitHub
 
-*Skip this if your project is already connected.*
+*Skip this step if your project is already connected to GitHub.*
 
 1. In Lovable, open your project.
-2. Open **Settings → Connectors → GitHub** (or click the GitHub button in the editor) and follow the steps.
+2. Open **Settings → Connectors → GitHub**. Or click the GitHub button in the editor.
+3. Follow the steps on the screen.
 
 **You should see:** a new repository (repo) on GitHub with your project's code. A repo is your project's folder on GitHub.
 
@@ -27,22 +28,28 @@ About 15 minutes. You'll change one GitHub setting, add 6 files to GitHub, and s
 
 1. On GitHub, open your repo.
 2. Click **Settings → Actions → General**.
-3. Scroll to **Workflow permissions**, choose **Read and write permissions**, and click **Save**.
+3. Scroll down to **Workflow permissions**.
+4. Choose **Read and write permissions**.
+5. Click **Save**.
 
-**Why:** a small GitHub robot (called an Action) numbers your versions. It needs this permission to save them.
+Why this is needed: a small GitHub robot (called an Action) numbers your versions. It needs this permission to save them.
 
 ---
 
 ## Step 3: Add the 6 files
 
-For each file below:
+Add the files in the order of the table below. File 6 switches everything on, so it goes last.
+
+For each file:
 
 1. On your repo's main page, click **Add file → Create new file**.
-2. In the name box, type the **name on GitHub** exactly. Typing `/` creates a folder.
-3. Copy the file's contents and paste them into the big box. In START-HERE.html, click **Show** under the table, then **Copy**. If you open the files yourself, right-click them and choose **Open with → Notepad** (Windows) or **TextEdit** (Mac).
-4. Click **Commit changes**, then **Commit changes** again.
+2. In the name box, type the file's **name on GitHub** exactly. Typing `/` creates a folder.
+3. Copy the file's contents (see how below).
+4. Paste them into the big box.
+5. Click **Commit changes** (commit means save on GitHub).
+6. Click **Commit changes** again.
 
-Add them **in this order**. File 6 switches everything on, so it goes last.
+How to copy a file: in START-HERE.html, click **Show** under the table, then **Copy**. If you open the files yourself, right-click the file and choose **Open with → Notepad** (Windows) or **TextEdit** (Mac).
 
 | # | File in copy-paste | Name on GitHub |
 |---|---|---|
@@ -60,31 +67,34 @@ Add them **in this order**. File 6 switches everything on, so it goes last.
 <!-- file: copy-paste/5-VersionPill.tsx -->
 <!-- file: copy-paste/6-ai-versions.yml -->
 
-**You should see:** after file 6, open the **Actions** tab. Within a minute, "AI Versions" gets a green check.
+**You should see:** after you add file 6, open the **Actions** tab in your repo. Within a minute, "AI Versions" gets a green check.
 
-> **Red cross instead?** Do Step 2 again, then open the failed run and click **Re-run jobs**.
+> **Red cross instead?** Do Step 2 again. Then open the failed run and click **Re-run jobs**.
 
 ---
 
 ## Step 4: Lock your versions (recommended)
 
-Without this, a version can be deleted by anyone with access to the repo. With it, nobody can delete or change a version, including you.
+Without this step, anyone with access to the repo can delete a version. With it, nobody can delete or change a version, not even you.
 
-1. On GitHub: **Settings → Rules → Rulesets → New ruleset → New tag ruleset**.
-2. Name: `protect versions`. Enforcement status: **Active**.
-3. Under **Target tags**, click **Add target → Include by pattern**, type `v*`.
-4. Turn on **Restrict updates**, **Restrict deletions** and **Block force pushes**.
-5. Leave **Restrict creations** off. With it on, new versions can't be saved.
-6. Click **Create**.
+*Rulesets (GitHub's protection rules) on private repos need a paid GitHub plan. On the free plan, skip this step and back up regularly. Your versions stay until someone deletes them.*
 
-*Rulesets on private repos need a paid GitHub plan. On the free plan, skip this step and back up regularly: your versions stay until someone deletes them.*
+1. On GitHub, open **Settings → Rules → Rulesets → New ruleset → New tag ruleset**.
+2. For the name, type `protect versions`.
+3. Set **Enforcement status** to **Active**.
+4. Under **Target tags**, click **Add target → Include by pattern**.
+5. Type `v*`.
+6. Turn on **Restrict updates**, **Restrict deletions** and **Block force pushes**.
+7. Leave **Restrict creations** off. If it is on, new versions can't be saved.
+8. Click **Create**.
 
 ---
 
 ## Step 5: Teach Lovable the rules
 
 1. In Lovable, open **Project Settings → Knowledge**.
-2. Paste everything from `LOVABLE-KNOWLEDGE.md` and save.
+2. Paste everything from `LOVABLE-KNOWLEDGE.md`.
+3. Save.
 
 <!-- file: LOVABLE-KNOWLEDGE.md -->
 
@@ -98,13 +108,13 @@ Send this message in Lovable's chat:
 In src/App.tsx, add import VersionPill from "./components/VersionPill"; and render <VersionPill /> once, just before the closing tag of the outermost element that App returns. Don't change src/components/VersionPill.tsx.
 ```
 
-**You should see:** about a minute later, a small button like `v1.0.1` in the bottom-left corner of the preview. Click it to see your versions.
+**You should see:** after about a minute, a small button like `v1.0.1` in the bottom-left corner of the preview. Click it to see your versions.
 
 ---
 
 ## Step 7: Try it
 
-Send these to Lovable one at a time. After each, wait about a minute and click the version button.
+Send these messages to Lovable one at a time. After each one, wait about a minute. Then click the version button.
 
 | Send this | The button should show |
 |---|---|
@@ -114,9 +124,9 @@ Send these to Lovable one at a time. After each, wait about a minute and click t
 | Go back to the version with the pricing section | Went back (takes 1 to 2 minutes) |
 | *Change one line yourself in the code editor* | Small tweak |
 
-> **Going back restores code, not data.** Database rows and uploaded files stay as they are. If a change added or changed database tables, going back can break the app, because the tables aren't rolled back. Ask Lovable to fix it afterwards.
+> **Going back restores code, not data.** Database rows and uploaded files stay as they are. If a change added or changed database tables, going back can break the app, because the tables don't go back. If that happens, ask Lovable to fix it.
 
-The exact numbers can differ. What matters is that every change shows up with a sensible label.
+Your version numbers may be different. What matters is that every change shows up with a label that fits it.
 
 ---
 
@@ -124,8 +134,8 @@ The exact numbers can differ. What matters is that every change shows up with a 
 
 For everyday use, see `HOW-TO-USE.md`. Two things to keep in mind:
 
-- **Go back by asking in chat**, not with Lovable's History button. Chat keeps the versioning files up to date. Lovable's History brings back old copies of them too, which can stop versioning.
-- **Going back to a version from before setup** makes the version button disappear, because that version didn't have it yet. Send Step 6's message again to bring it back.
+- **Go back by asking in chat**, not with Lovable's History button. Chat keeps the versioning files up to date. Lovable's History also brings back old copies of those files, and that can stop versioning.
+- **Going back to a version from before setup** makes the version button disappear, because that version didn't have the button yet. To bring it back, send Step 6's message again.
 
 ---
 
@@ -133,19 +143,26 @@ For everyday use, see `HOW-TO-USE.md`. Two things to keep in mind:
 
 | What you see | What to do |
 |---|---|
-| No "AI Versions" run in the Actions tab | Check file 6's name: `.github/workflows/ai-versions.yml` |
-| Red cross with "403" | Do Step 2, then **Re-run jobs** |
-| Red cross mentioning "Restrict creations" | Turn that off in Step 4's ruleset, then **Re-run jobs** |
-| No version button in the preview | Send Step 6's message again, or add `?versions=on` to the end of the preview link |
-| The button says "The version list isn't here yet" | Wait a minute for the green check in Actions, then open the button again |
-| Every change says "Small tweak" | Check that Step 5's text is saved in Knowledge |
-| Versioning stopped after using Lovable's History | Add the 6 files again (Step 3) |
+| No "AI Versions" run in the Actions tab | Check file 6's name. It must be `.github/workflows/ai-versions.yml` |
+| A red cross with "403" | Do Step 2 again. Then open the failed run and click **Re-run jobs**. |
+| A red cross that mentions "Restrict creations" | Turn **Restrict creations** off in Step 4's ruleset. Then click **Re-run jobs**. |
+| No version button in the preview | Send Step 6's message again. Or add `?versions=on` to the end of the preview link. |
+| The button says "The version list isn't here yet" | Wait a minute for the green check in Actions. Then open the button again. |
+| Every change says "Small tweak" | Check that Step 5's text is saved in Knowledge. |
+| Versioning stopped after you used Lovable's History | Add the 6 files again (Step 3). |
 
 ---
 
 ## Privacy
 
-- **Your prompts aren't shown in the version button by default**, because your live site serves the version list at `your-site.com/ai-versions.json` for anyone to read.
-- **To show them:** on GitHub, **Settings → Secrets and variables → Actions → Variables → New repository variable**. Name `AI_VERSIONS_PILL_NOTES`, value `yes`.
-- **Prompts are always saved in the version tags and release pages on GitHub.** On a public repo, anyone can read those.
-- **Extra entries in Lovable's History.** After each change you'll see an "Update version list" entry. That's the robot updating the version button; it doesn't create a version.
+By default, the version button doesn't show your prompts. This is because your live site shows the version list at `your-site.com/ai-versions.json`, and anyone can read it.
+
+To show your prompts in the button:
+
+1. On GitHub, open **Settings → Secrets and variables → Actions → Variables → New repository variable**.
+2. For the name, type `AI_VERSIONS_PILL_NOTES`.
+3. For the value, type `yes`.
+
+**Prompts are always saved in the version tags and release pages on GitHub.** On a public repo, anyone can read those. (Tags and releases are how GitHub stores each version.)
+
+Extra entries in Lovable's History: after each change, you will see an "Update version list" entry. That's the robot updating the version button. It doesn't create a version.
