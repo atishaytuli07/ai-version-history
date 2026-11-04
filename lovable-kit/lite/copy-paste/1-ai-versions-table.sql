@@ -57,6 +57,9 @@ begin
   if expected is null or new.version <> expected then
     raise exception 'ai_versions: % is not the next version (expected %)', new.version, coalesce(expected, 'none');
   end if;
+  if new.level = 'restore' and new.restored_from is null then
+    raise exception 'ai_versions: a restore must say which version it went back to';
+  end if;
   if new.restored_from is not null
      and not exists (select 1 from public.ai_versions where version = new.restored_from) then
     raise exception 'ai_versions: % does not exist', new.restored_from;
@@ -82,3 +85,6 @@ create policy "Anyone can read versions"
   on public.ai_versions for select using (true);
 create policy "Anyone can add versions"
   on public.ai_versions for insert with check (true);
+
+-- Belt and braces: the app's keys may only read and add, never change, delete or empty the table.
+revoke update, delete, truncate on public.ai_versions from anon, authenticated;

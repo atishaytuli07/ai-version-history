@@ -175,6 +175,9 @@ begin
   if expected is null or new.version &lt;&gt; expected then
     raise exception &#x27;ai_versions: % is not the next version (expected %)&#x27;, new.version, coalesce(expected, &#x27;none&#x27;);
   end if;
+  if new.level = &#x27;restore&#x27; and new.restored_from is null then
+    raise exception &#x27;ai_versions: a restore must say which version it went back to&#x27;;
+  end if;
   if new.restored_from is not null
      and not exists (select 1 from public.ai_versions where version = new.restored_from) then
     raise exception &#x27;ai_versions: % does not exist&#x27;, new.restored_from;
@@ -200,6 +203,9 @@ create policy &quot;Anyone can read versions&quot;
   on public.ai_versions for select using (true);
 create policy &quot;Anyone can add versions&quot;
   on public.ai_versions for insert with check (true);
+
+-- Belt and braces: the app&#x27;s keys may only read and add, never change, delete or empty the table.
+revoke update, delete, truncate on public.ai_versions from anon, authenticated;
 </code></pre></details>
 <p>Lovable may warn that anyone can read or add rows (entries) to <code>ai_versions</code>. That's true. It is the risk described at the top of this page. The SQL (the database commands in the file) limits what can be added. It can't make the list private.</p>
 <p>If Lovable won't run the SQL:</p>
@@ -959,7 +965,13 @@ const changedFiles = (parent, commit) =&gt;
 const parse = (t) =&gt; TAG_RE.exec(t)?.slice(1).map(Number);
 const cmp = (a, b) =&gt; a[0] - b[0] || a[1] - b[1] || a[2] - b[2];
 
-const tags = (tryGit(&#x27;tag&#x27;, &#x27;-l&#x27;, &#x27;v*&#x27;) || &#x27;&#x27;).split(&#x27;\n&#x27;).filter((t) =&gt; TAG_RE.test(t));
+// Only tags this kit made count: they carry its JSON (with &quot;kind&quot;) in the tag message.
+// Other vX.Y.Z tags, e.g. from `npm version` or a release tool, are left alone.
+const isKitTag = (t) =&gt; {
+  try { return typeof JSON.parse(tryGit(&#x27;tag&#x27;, &#x27;-l&#x27;, &#x27;--format=%(contents:body)&#x27;, t) || &#x27;&#x27;).kind === &#x27;string&#x27;; } catch { return false; }
+};
+const kitTags = () =&gt; (tryGit(&#x27;tag&#x27;, &#x27;-l&#x27;, &#x27;v*&#x27;) || &#x27;&#x27;).split(&#x27;\n&#x27;).filter((t) =&gt; TAG_RE.test(t) &amp;&amp; isKitTag(t));
+const tags = kitTags();
 tags.sort((a, b) =&gt; cmp(parse(a), parse(b)));
 
 const commitToTag = new Map();
@@ -1081,11 +1093,16 @@ function readPending(commit, parent) {
 }
 
 // A restore that is not byte-identical (e.g. the tool left one file alone):
-// pending.json went back to an old version&#x27;s entry AND the code now differs
-// from that version in only a few files (at most 2, or under 20% of what changed).
+// pending.json went back to an old version&#x27;s entry, most of the files that changed
+// now match that version again, AND the code differs from it in only a few files
+// (at most 2, or under 20% of what changed). Reusing an old pending.json for a new
+// edit is not a restore.
 function looksLikeRestore(commit, parent, tag) {
   if (!parent) return false;
   const changed = changedFiles(parent, commit).filter((f) =&gt; f !== PENDING);
+  if (!changed.length) return false;
+  const back = changed.filter((f) =&gt; tryGit(&#x27;rev-parse&#x27;, `${commit}:${f}`) === tryGit(&#x27;rev-parse&#x27;, `${tag}^{commit}:${f}`));
+  if (back.length * 2 &lt; changed.length) return false;
   const offFromTag = git(&#x27;diff&#x27;, &#x27;--name-only&#x27;, `${tag}^{commit}`, commit).split(&#x27;\n&#x27;)
     .filter((f) =&gt; f &amp;&amp; !isKitFile(f));
   return offFromTag.length &lt;= 2 || offFromTag.length &lt; 0.2 * changed.length;
@@ -1156,12 +1173,12 @@ let notice = null;
 function keepKitFrom(tip) {
   const tipKit = git(&#x27;ls-tree&#x27;, &#x27;-r&#x27;, &#x27;--name-only&#x27;, tip).split(&#x27;\n&#x27;).filter((f) =&gt; f &amp;&amp; isKitFile(f));
   for (const f of git(&#x27;ls-files&#x27;).split(&#x27;\n&#x27;).filter((x) =&gt; x &amp;&amp; isKitFile(x) &amp;&amp; !tipKit.includes(x))) {
-    tryGit(&#x27;rm&#x27;, &#x27;-q&#x27;, &#x27;--cached&#x27;, &#x27;--&#x27;, f);
-    tryGit(&#x27;clean&#x27;, &#x27;-q&#x27;, &#x27;-f&#x27;, &#x27;--&#x27;, f);
+    tryGit(&#x27;--literal-pathspecs&#x27;, &#x27;rm&#x27;, &#x27;-q&#x27;, &#x27;--cached&#x27;, &#x27;--&#x27;, f);
+    tryGit(&#x27;--literal-pathspecs&#x27;, &#x27;clean&#x27;, &#x27;-q&#x27;, &#x27;-f&#x27;, &#x27;--&#x27;, f);
   }
-  if (tipKit.length) git(&#x27;checkout&#x27;, tip, &#x27;--&#x27;, ...tipKit);
-  tryGit(&#x27;rm&#x27;, &#x27;-q&#x27;, &#x27;--cached&#x27;, &#x27;--ignore-unmatch&#x27;, &#x27;--&#x27;, REQUEST);
-  tryGit(&#x27;clean&#x27;, &#x27;-q&#x27;, &#x27;-f&#x27;, &#x27;--&#x27;, REQUEST);
+  if (tipKit.length) git(&#x27;--literal-pathspecs&#x27;, &#x27;checkout&#x27;, tip, &#x27;--&#x27;, ...tipKit);
+  tryGit(&#x27;--literal-pathspecs&#x27;, &#x27;rm&#x27;, &#x27;-q&#x27;, &#x27;--cached&#x27;, &#x27;--ignore-unmatch&#x27;, &#x27;--&#x27;, REQUEST);
+  tryGit(&#x27;--literal-pathspecs&#x27;, &#x27;clean&#x27;, &#x27;-q&#x27;, &#x27;-f&#x27;, &#x27;--&#x27;, REQUEST);
 }
 
 // A request counts only if the app code hasn&#x27;t changed since it was made. If the user
@@ -1232,7 +1249,7 @@ function handleRestoreRequest() {
     }
     return;
   }
-  warnings.push(&#x27;Could not apply the go-back request after 3 tries. It will be dropped on the next run; ask again then.&#x27;);
+  warnings.push(&#x27;Could not apply the go-back request after 3 tries. The next run tries again; if you change the app first, the request is dropped, so ask again then.&#x27;);
 }
 
 if (latest) handleRestoreRequest();
@@ -1242,7 +1259,7 @@ if (latest) handleRestoreRequest();
 // reasons are left out unless PILL_NOTES=yes. Versions, dates and summaries stay.
 const HIDE_NOTES = String(process.env.PILL_NOTES || &#x27;no&#x27;).toLowerCase() !== &#x27;yes&#x27;;
 function buildLedger() {
-  const all = (tryGit(&#x27;tag&#x27;, &#x27;-l&#x27;, &#x27;v*&#x27;) || &#x27;&#x27;).split(&#x27;\n&#x27;).filter((t) =&gt; TAG_RE.test(t));
+  const all = kitTags();
   all.sort((a, b) =&gt; cmp(parse(b), parse(a))); // newest first
   const builtOn = new Map(); // after going back, later versions are built on that version
   let base = null;
@@ -1340,12 +1357,12 @@ const out = (k, v) =&gt; process.env.GITHUB_OUTPUT &amp;&amp; appendFileSync(pro
 git(&#x27;read-tree&#x27;, &#x27;-u&#x27;, &#x27;--reset&#x27;, `${version}^{tree}`); // app files become exactly the old version
 const tipKit = git(&#x27;ls-tree&#x27;, &#x27;-r&#x27;, &#x27;--name-only&#x27;, before).split(&#x27;\n&#x27;).filter((f) =&gt; f &amp;&amp; isKitFile(f));
 for (const f of git(&#x27;ls-files&#x27;).split(&#x27;\n&#x27;).filter((x) =&gt; x &amp;&amp; isKitFile(x) &amp;&amp; !tipKit.includes(x))) {
-  tryGit(&#x27;rm&#x27;, &#x27;-q&#x27;, &#x27;--cached&#x27;, &#x27;--&#x27;, f);
-  tryGit(&#x27;clean&#x27;, &#x27;-q&#x27;, &#x27;-f&#x27;, &#x27;--&#x27;, f);
+  tryGit(&#x27;--literal-pathspecs&#x27;, &#x27;rm&#x27;, &#x27;-q&#x27;, &#x27;--cached&#x27;, &#x27;--&#x27;, f);
+  tryGit(&#x27;--literal-pathspecs&#x27;, &#x27;clean&#x27;, &#x27;-q&#x27;, &#x27;-f&#x27;, &#x27;--&#x27;, f);
 }
-if (tipKit.length) git(&#x27;checkout&#x27;, before, &#x27;--&#x27;, ...tipKit);
-git(&#x27;rm&#x27;, &#x27;-q&#x27;, &#x27;--cached&#x27;, &#x27;--ignore-unmatch&#x27;, REQUEST); // a pending chat request is replaced by this one
-tryGit(&#x27;clean&#x27;, &#x27;-q&#x27;, &#x27;-f&#x27;, &#x27;--&#x27;, REQUEST);
+if (tipKit.length) git(&#x27;--literal-pathspecs&#x27;, &#x27;checkout&#x27;, before, &#x27;--&#x27;, ...tipKit);
+git(&#x27;--literal-pathspecs&#x27;, &#x27;rm&#x27;, &#x27;-q&#x27;, &#x27;--cached&#x27;, &#x27;--ignore-unmatch&#x27;, REQUEST); // a pending chat request is replaced by this one
+tryGit(&#x27;--literal-pathspecs&#x27;, &#x27;clean&#x27;, &#x27;-q&#x27;, &#x27;-f&#x27;, &#x27;--&#x27;, REQUEST);
 
 if (tryGit(&#x27;diff&#x27;, &#x27;--cached&#x27;, &#x27;--quiet&#x27;, &#x27;HEAD&#x27;) !== null) {
   console.log(`The project is already identical to ${version}. Nothing to do.`);

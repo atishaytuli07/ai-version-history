@@ -123,6 +123,7 @@ In app/layout.tsx, add import VersionPill from "@/components/VersionPill"; and r
 | What you see | What to do |
 |---|---|
 | No "AI Versions" run in Actions | Check file 6's path. For v0, versions are made when you click **Publish**, so check that the change was published. |
+| The button keeps saying "The version list isn't here yet", and your site is in a sub-folder (like `example.com/app/`) | Tell the AI: "Change `<VersionPill />` to `<VersionPill src="/app/ai-versions.json" />`", using your sub-folder's name. |
 | Red cross with "403" | Do Step 2. Then open the run and click **Re-run jobs**. |
 | No version button | Send Step 5's message again, or add `?versions=on` to the preview address. |
 | Button says "The version list isn't here yet" | Wait for a green check in Actions, then reopen the button. If the message stays, the builder may not be pulling (copying in) changes from GitHub. Please report it. |

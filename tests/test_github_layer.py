@@ -215,5 +215,21 @@ check("14 PILL_NOTES=yes shows them", any(v["note"] for v in ledger()["versions"
 # 10. ledger sanity
 lg = ledger()["versions"]
 check("10 list has every version, newest first", [v["version"] for v in lg] == tags()[::-1])
+# 29. reusing an old pending.json for a NEW edit is not a restore
+kit_tags = lambda: [t for t in tags() if "kind" in sh("git", "tag", "-l", "--format=%(contents:body)", t, cwd=L).stdout]
+first_with_pending = next(t for t in kit_tags() if sh("git", "cat-file", "-e", "%s:.ai-versions/pending.json" % t, cwd=L, ok=False).returncode == 0)
+(L / ".ai-versions/pending.json").write_text(sh("git", "show", "%s:.ai-versions/pending.json" % first_with_pending, cwd=L).stdout)
+(L / "index.html").write_text("brand-new content\n")
+push("new edit with an old pending.json")
+check("29 an old pending.json on a new edit is not called a restore", body(kit_tags()[-1])["kind"] != "restore", body(kit_tags()[-1]))
+
+# 30. a vX.Y.Z tag the kit didn't make (npm version, a release tool) is ignored
+before_kit = kit_tags()[-1]
+sh("git", "tag", "v50.0.0", cwd=L); sh("git", "push", "-q", "origin", "v50.0.0", cwd=L)
+change("after a foreign tag", "patch", "After a foreign tag")
+newest = kit_tags()[-1]
+check("30 foreign tags don't change the numbering", newest != "v50.0.1" and newest.startswith(before_kit.rsplit(".", 1)[0] + "."), (before_kit, newest))
+check("30 foreign tags stay out of the version list", "v50.0.0" not in [v["version"] for v in ledger()["versions"]])
+
 print("\n%d/%d passed" % (sum(results), len(results)))
 sys.exit(0 if all(results) else 1)

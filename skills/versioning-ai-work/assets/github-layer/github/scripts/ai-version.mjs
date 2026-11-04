@@ -69,7 +69,13 @@ const changedFiles = (parent, commit) =>
 const parse = (t) => TAG_RE.exec(t)?.slice(1).map(Number);
 const cmp = (a, b) => a[0] - b[0] || a[1] - b[1] || a[2] - b[2];
 
-const tags = (tryGit('tag', '-l', 'v*') || '').split('\n').filter((t) => TAG_RE.test(t));
+// Only tags this kit made count: they carry its JSON (with "kind") in the tag message.
+// Other vX.Y.Z tags, e.g. from `npm version` or a release tool, are left alone.
+const isKitTag = (t) => {
+  try { return typeof JSON.parse(tryGit('tag', '-l', '--format=%(contents:body)', t) || '').kind === 'string'; } catch { return false; }
+};
+const kitTags = () => (tryGit('tag', '-l', 'v*') || '').split('\n').filter((t) => TAG_RE.test(t) && isKitTag(t));
+const tags = kitTags();
 tags.sort((a, b) => cmp(parse(a), parse(b)));
 
 const commitToTag = new Map();
@@ -191,11 +197,16 @@ function readPending(commit, parent) {
 }
 
 // A restore that is not byte-identical (e.g. the tool left one file alone):
-// pending.json went back to an old version's entry AND the code now differs
-// from that version in only a few files (at most 2, or under 20% of what changed).
+// pending.json went back to an old version's entry, most of the files that changed
+// now match that version again, AND the code differs from it in only a few files
+// (at most 2, or under 20% of what changed). Reusing an old pending.json for a new
+// edit is not a restore.
 function looksLikeRestore(commit, parent, tag) {
   if (!parent) return false;
   const changed = changedFiles(parent, commit).filter((f) => f !== PENDING);
+  if (!changed.length) return false;
+  const back = changed.filter((f) => tryGit('rev-parse', `${commit}:${f}`) === tryGit('rev-parse', `${tag}^{commit}:${f}`));
+  if (back.length * 2 < changed.length) return false;
   const offFromTag = git('diff', '--name-only', `${tag}^{commit}`, commit).split('\n')
     .filter((f) => f && !isKitFile(f));
   return offFromTag.length <= 2 || offFromTag.length < 0.2 * changed.length;
@@ -266,12 +277,12 @@ let notice = null;
 function keepKitFrom(tip) {
   const tipKit = git('ls-tree', '-r', '--name-only', tip).split('\n').filter((f) => f && isKitFile(f));
   for (const f of git('ls-files').split('\n').filter((x) => x && isKitFile(x) && !tipKit.includes(x))) {
-    tryGit('rm', '-q', '--cached', '--', f);
-    tryGit('clean', '-q', '-f', '--', f);
+    tryGit('--literal-pathspecs', 'rm', '-q', '--cached', '--', f);
+    tryGit('--literal-pathspecs', 'clean', '-q', '-f', '--', f);
   }
-  if (tipKit.length) git('checkout', tip, '--', ...tipKit);
-  tryGit('rm', '-q', '--cached', '--ignore-unmatch', '--', REQUEST);
-  tryGit('clean', '-q', '-f', '--', REQUEST);
+  if (tipKit.length) git('--literal-pathspecs', 'checkout', tip, '--', ...tipKit);
+  tryGit('--literal-pathspecs', 'rm', '-q', '--cached', '--ignore-unmatch', '--', REQUEST);
+  tryGit('--literal-pathspecs', 'clean', '-q', '-f', '--', REQUEST);
 }
 
 // A request counts only if the app code hasn't changed since it was made. If the user
@@ -342,7 +353,7 @@ function handleRestoreRequest() {
     }
     return;
   }
-  warnings.push('Could not apply the go-back request after 3 tries. It will be dropped on the next run; ask again then.');
+  warnings.push('Could not apply the go-back request after 3 tries. The next run tries again; if you change the app first, the request is dropped, so ask again then.');
 }
 
 if (latest) handleRestoreRequest();
@@ -352,7 +363,7 @@ if (latest) handleRestoreRequest();
 // reasons are left out unless PILL_NOTES=yes. Versions, dates and summaries stay.
 const HIDE_NOTES = String(process.env.PILL_NOTES || 'no').toLowerCase() !== 'yes';
 function buildLedger() {
-  const all = (tryGit('tag', '-l', 'v*') || '').split('\n').filter((t) => TAG_RE.test(t));
+  const all = kitTags();
   all.sort((a, b) => cmp(parse(b), parse(a))); // newest first
   const builtOn = new Map(); // after going back, later versions are built on that version
   let base = null;

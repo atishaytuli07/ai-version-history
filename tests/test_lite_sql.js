@@ -7,6 +7,8 @@ const check = (name, ok, detail = "") => { ok ? pass++ : fail++; console.log((ok
 (async () => {
   const db = new PGlite();
   await db.exec("create role anon; create role authenticated;");
+  // Like Supabase: new tables in public get every privilege for the app's roles by default.
+  await db.exec("alter default privileges in schema public grant all on tables to anon, authenticated;");
   await db.exec(sql);
   await db.exec(sql); // running it twice must be safe
   await db.exec("grant usage on schema public to anon; grant select, insert, update, delete on public.ai_versions to anon;");
@@ -39,6 +41,9 @@ const check = (name, ok, detail = "") => { ok ? pass++ : fail++; console.log((ok
   const still = await db.query("select summary from ai_versions where version='v1.0.0'");
   check("the app can't change versions", upd.affectedRows === 0 && still.rows[0].summary === "s");
   check("the app can't delete versions", del.affectedRows === 0 && still.rows.length === 1);
+  check("a restore must say where it went back to", (await ins("v2.2.0", "restore")).includes("must say which version"));
+  const trunc = await db.exec("truncate ai_versions").then(() => "ok", (e) => e.message);
+  check("the app can't empty the table", trunc !== "ok" && (await db.query("select count(*)::int c from ai_versions")).rows[0].c > 0, trunc);
   // rate limit: 20 per minute
   let last = "ok", n = 0;
   for (let i = 1; i <= 25 && last === "ok"; i++) { last = await ins(`v2.1.${i}`, "patch"); if (last === "ok") n++; }

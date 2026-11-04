@@ -35,12 +35,12 @@ const out = (k, v) => process.env.GITHUB_OUTPUT && appendFileSync(process.env.GI
 git('read-tree', '-u', '--reset', `${version}^{tree}`); // app files become exactly the old version
 const tipKit = git('ls-tree', '-r', '--name-only', before).split('\n').filter((f) => f && isKitFile(f));
 for (const f of git('ls-files').split('\n').filter((x) => x && isKitFile(x) && !tipKit.includes(x))) {
-  tryGit('rm', '-q', '--cached', '--', f);
-  tryGit('clean', '-q', '-f', '--', f);
+  tryGit('--literal-pathspecs', 'rm', '-q', '--cached', '--', f);
+  tryGit('--literal-pathspecs', 'clean', '-q', '-f', '--', f);
 }
-if (tipKit.length) git('checkout', before, '--', ...tipKit);
-git('rm', '-q', '--cached', '--ignore-unmatch', REQUEST); // a pending chat request is replaced by this one
-tryGit('clean', '-q', '-f', '--', REQUEST);
+if (tipKit.length) git('--literal-pathspecs', 'checkout', before, '--', ...tipKit);
+git('--literal-pathspecs', 'rm', '-q', '--cached', '--ignore-unmatch', REQUEST); // a pending chat request is replaced by this one
+tryGit('--literal-pathspecs', 'clean', '-q', '-f', '--', REQUEST);
 
 if (tryGit('diff', '--cached', '--quiet', 'HEAD') !== null) {
   console.log(`The project is already identical to ${version}. Nothing to do.`);
