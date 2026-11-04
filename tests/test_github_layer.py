@@ -1,5 +1,21 @@
-import json, os, shutil, subprocess, sys, tempfile
+import json, os, shutil, stat, subprocess, sys, tempfile
 from pathlib import Path
+
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+
+
+def rmtree(path):
+    """Delete a folder, including git's read-only object files on Windows."""
+    def writable(func, p, _exc):
+        os.chmod(p, stat.S_IWRITE)
+        func(p)
+    if not os.path.exists(path):
+        return
+    if sys.version_info >= (3, 12):
+        shutil.rmtree(path, onexc=writable)
+    else:
+        shutil.rmtree(path, onerror=writable)
 
 ASSETS = Path(sys.argv[1]).resolve()
 T = Path(tempfile.mkdtemp())
@@ -8,7 +24,7 @@ results = []
 
 
 def sh(*a, cwd, ok=True, extra=None):
-    p = subprocess.run(list(a), cwd=str(cwd), capture_output=True, text=True, env={**env, **(extra or {})})
+    p = subprocess.run(list(a), cwd=str(cwd), capture_output=True, text=True, encoding="utf-8", errors="replace", env={**env, **(extra or {})})
     if ok and p.returncode:
         raise AssertionError("%s\n%s%s" % (a, p.stdout, p.stderr))
     return p
@@ -47,7 +63,7 @@ log = []
 def action(before, after=None, notes=None):
     """Simulates the AI Versions workflow run (GITHUB_TOKEN pushes are marked as the bot)."""
     run = T / "run"
-    shutil.rmtree(run, ignore_errors=True)
+    rmtree(run)
     sh("git", "clone", "-q", str(T / "remote.git"), "run", cwd=T)
     sh("git", "fetch", "-q", "--tags", "--force", cwd=run)
     if after:
@@ -152,7 +168,7 @@ vs = tags(); check("8 no duplicate version numbers", len(vs) == len(set(vs)))
 # 9. manual AI Restore workflow clears a pending chat request
 (L / ".ai-versions/restore.json").write_text(json.dumps({"version": "v1.0.1"}))
 sh("git", "add", "-A", cwd=L); sh("git", "commit", "-qm", "request not processed yet", cwd=L); sh("git", "push", "-q", "origin", "main", cwd=L)
-run = T / "run2"; shutil.rmtree(run, ignore_errors=True); sh("git", "clone", "-q", str(T / "remote.git"), "run2", cwd=T); sh("git", "fetch", "-q", "--tags", cwd=run)
+run = T / "run2"; rmtree(run); sh("git", "clone", "-q", str(T / "remote.git"), "run2", cwd=T); sh("git", "fetch", "-q", "--tags", cwd=run)
 out = run / "out.txt"
 sh("node", ".github/scripts/ai-restore.mjs", cwd=run, extra={"VERSION": "v1.1.0", "BRANCH": "main", "GITHUB_OUTPUT": str(out)})
 o = dict(l.split("=", 1) for l in out.read_text().split())
