@@ -10,8 +10,8 @@ permissions:
 
 jobs:
   script:
-    # Python 3.8 has no build for the newest Ubuntu image, so it runs on 22.04.
-    runs-on: ${{ matrix.python == '3.8' && 'ubuntu-22.04' || 'ubuntu-latest' }}
+    # Python 3.8 and 3.9 have no build for the newest Ubuntu image, so they run on 22.04.
+    runs-on: ${{ (matrix.python == '3.8' || matrix.python == '3.9') && 'ubuntu-22.04' || 'ubuntu-latest' }}
     strategy:
       fail-fast: false
       matrix:
