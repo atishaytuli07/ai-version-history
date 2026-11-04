@@ -23,6 +23,7 @@ import subprocess
 import sys
 import threading
 import time
+import unicodedata
 import zipfile
 import zlib
 from pathlib import Path
@@ -117,13 +118,25 @@ def plain_rel(path: str) -> bool:
         part not in ("", ".", "..") and ":" not in part for part in parts)
 
 
+HEX64 = re.compile(r"[0-9a-f]{64}")
+SHORT_NAME = re.compile(r"[^.~]{1,6}~[0-9]+(\.[^.]{0,3})?")  # Windows 8.3 names: GIT~1 is .git
+
+
+def name_key(part: str) -> str:
+    """How Windows and macOS see a file name: case, trailing dots and spaces, and look-alike
+    Unicode don't make a different name (".GIT." is ".git")."""
+    return unicodedata.normalize("NFKC", part).casefold().rstrip(" .")
+
+
 def safe_rel(path: str) -> bool:
-    """A project file we may write: not git internals, the history itself, or AI tool settings
-    (checked without regard to case, for Windows and macOS)."""
+    """A project file we may write: not git internals, the history itself, or AI tool settings,
+    however the name is spelled."""
     if not plain_rel(path):
         return False
-    low = path.replace("\\", "/").lower()
-    return low.split("/")[0] not in PROTECTED_TOP and not low.startswith(".github/skills/")
+    parts = [name_key(p) for p in path.replace("\\", "/").split("/")]
+    if any(p in ("", ".git", STORE) or (os.name == "nt" and SHORT_NAME.fullmatch(p)) for p in parts):
+        return False  # a .git or history folder anywhere would let the files run commands
+    return parts[0] not in PROTECTED_TOP and parts[:2] != [".github", "skills"]
 
 
 def write_atomic(path: Path, data: bytes) -> None:
@@ -599,6 +612,9 @@ def write_files(store: Store, target: dict, current: dict):
                 p = root / parent
                 if str(parent) != "." and (p.is_symlink() or (p.exists() and not p.is_dir())):
                     keep_aside(p)
+            if not lands_inside(root, dest):
+                raise Fail("Stopped before writing %s: it would land outside the project or in a protected "
+                           "folder. Nothing else was changed after this point." % rel)
             if dest.is_symlink() or dest.is_dir():
                 keep_aside(dest)
             elif dest.exists() and rel not in current:
@@ -612,6 +628,16 @@ def write_files(store: Store, target: dict, current: dict):
         raise Fail("Couldn't finish writing the files (%s). Your work from before was saved in the history "
                    "first, so nothing is lost: run `list` and go back to the newest version." % err)
     return n, aside
+
+
+def lands_inside(root: Path, dest: Path) -> bool:
+    """Where the operating system would really put `dest` (following links and Windows short
+    names like GIT~1) is still a safe project path."""
+    try:
+        real = Path(os.path.realpath(str(dest))).relative_to(Path(os.path.realpath(str(root))))
+    except ValueError:
+        return False
+    return safe_rel(real.as_posix())
 
 
 def displaced_note(store: Store, aside: list) -> str:
@@ -694,26 +720,43 @@ def cmd_init(args) -> None:
         print(note)
 
 
-def exclude_from_git(root: Path) -> str:
+def git_exclude(root: Path, name: str) -> bool:
+    """Adds `name` (relative to root) to .git/info/exclude, so git never commits or checks it out."""
     if run_git(root, "rev-parse", "--is-inside-work-tree") is None:
-        return ""
+        return False
     ex = run_git(root, "rev-parse", "--git-path", "info/exclude")
     prefix = (run_git(root, "rev-parse", "--show-prefix") or "").strip()
     if not ex:
-        return ""
+        return False
     ex_path = Path(ex.strip())
     if not ex_path.is_absolute():
         ex_path = root / ex_path
-    line = "/" + prefix + STORE + "/"
+    line = "/" + prefix + name
     try:
         text = ex_path.read_text("utf-8") if ex_path.exists() else ""
         if line not in text.splitlines():
             ex_path.parent.mkdir(parents=True, exist_ok=True)
             with open(str(ex_path), "a", encoding="utf-8") as f:
                 f.write(("" if text.endswith("\n") or not text else "\n") + line + "\n")
-        return "Kept %s out of git (in .git/info/exclude) so git checkouts can't change the history." % STORE
+        return True
     except Exception:
+        return False
+
+
+def exclude_from_git(root: Path) -> str:
+    if not git_exclude(root, STORE + "/"):
         return ""
+    return "Kept %s out of git (in .git/info/exclude) so git checkouts can't change the history." % STORE
+
+
+def copy_self(dest: Path) -> None:
+    """Puts this script in the history folder, unless it's already the one running."""
+    try:
+        if dest.exists() and os.path.samefile(__file__, str(dest)):
+            return
+    except OSError:
+        pass
+    shutil.copyfile(__file__, str(dest))
 
 
 def cmd_save(args) -> None:
@@ -1045,15 +1088,33 @@ def cmd_import(args) -> None:
             if not n.startswith(STORE + "/") or not plain_rel(n):
                 raise Fail("Unsafe path in backup: %s. Nothing was imported." % n)
         # Every version's file list must be safe too, or a restore could plant files later.
+        # Ids must be real hashes, so nothing can point outside the history folder.
         for n in files:
-            if n.startswith(STORE + "/manifests/") and n.endswith(".json"):
+            if n.startswith(STORE + "/manifests/"):
+                if not (n.endswith(".json") and HEX64.fullmatch(n[len(STORE + "/manifests/"):-5])):
+                    raise Fail("Unexpected file in backup: %s. Nothing was imported." % n)
                 try:
-                    paths = list(json.loads(z.read(n).decode("utf-8")))
+                    listing = json.loads(z.read(n).decode("utf-8"))
+                    ok = isinstance(listing, dict) and all(
+                        isinstance(v, list) and len(v) == 3 and isinstance(v[0], str) and HEX64.fullmatch(v[0])
+                        and isinstance(v[2], int) for v in listing.values())
                 except Exception:
+                    ok = False
+                if not ok:
                     raise Fail("Broken file list in backup: %s. Nothing was imported." % n)
-                bad = [x for x in paths if not safe_rel(x)]
+                bad = [x for x in listing if not safe_rel(x)]
                 if bad:
                     raise Fail("This backup would write %s, which isn't allowed. Nothing was imported." % bad[0])
+            elif n.startswith(STORE + "/objects/"):
+                if not HEX64.fullmatch(n[len(STORE + "/objects/"):].replace("/", "")):
+                    raise Fail("Unexpected file in backup: %s. Nothing was imported." % n)
+            elif n.startswith(STORE + "/entries/") and n.endswith(".json"):
+                try:
+                    mid = json.loads(z.read(n).decode("utf-8")).get("manifest")
+                except Exception:
+                    mid = None
+                if not (isinstance(mid, str) and HEX64.fullmatch(mid)):
+                    raise Fail("Broken version in backup: %s. Nothing was imported." % n)
         for n in files:
             write_atomic(root / n, z.read(n))
     store = Store(root)
@@ -1062,7 +1123,7 @@ def cmd_import(args) -> None:
     written = 0
     for rel, meta in files.items():
         dest = root / rel
-        if safe_rel(rel) and not dest.exists():
+        if safe_rel(rel) and not dest.exists() and lands_inside(root, dest):
             write_atomic(dest, store.read_blob(meta["sha"]))
             if os.name != "nt" and meta["x"]:
                 dest.chmod(dest.stat().st_mode | 0o111)
@@ -1126,10 +1187,11 @@ def merge_json(path: Path, mutate) -> bool:
 
 def cmd_install_hooks(args) -> None:
     store = Store.find(Path(args.root or "."))
-    shutil.copyfile(__file__, str(store.dir / "aiv.py"))
+    copy_self(store.dir / "aiv.py")
     py = "py" if os.name == "nt" else "python3"  # not this machine's own path: hook files get shared
     if args.tool == "claude-code":
-        cmd = '%s "$CLAUDE_PROJECT_DIR/%s/aiv.py" auto --quiet' % (py, STORE)
+        # ${...} with braces: Claude Code fills it in for PowerShell hooks too, and bash reads it the same way
+        cmd = '%s "${CLAUDE_PROJECT_DIR}/%s/aiv.py" auto --quiet' % (py, STORE)
         path = store.root / ".claude" / "settings.local.json"
 
         def mutate(d):
@@ -1150,6 +1212,8 @@ def cmd_install_hooks(args) -> None:
             stops.append({"command": cmd, "timeout": 60})
             return True
     changed = merge_json(path, mutate)
+    if args.tool == "claude-code":
+        git_exclude(store.root, ".claude/settings.local.json")  # personal settings: never committed
     print(("Added an auto-save hook to %s." if changed else "The auto-save hook is already in %s.") % path.relative_to(store.root))
     print("From now on, any change the AI forgets to save is saved as a Small tweak when it finishes.")
     if args.tool == "cursor":

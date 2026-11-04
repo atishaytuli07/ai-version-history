@@ -367,6 +367,47 @@ check("going back across a file/folder swap finishes", p.returncode == 0 and (F 
 run("restore", "v1.1.0", cwd=F)
 check("and back again to the folder version", (F / "api/index.js").read_text(encoding="utf-8") == "new\n")
 
+# A crafted backup must not plant files that run code (git hooks, git config, AI tool settings)
+import hashlib as _hl, zlib as _zl
+def evil_backup(path, files, entry_manifest=None):
+    data = b"#!/bin/sh\necho PWNED\n"; sha = _hl.sha256(data).hexdigest()
+    man = json.dumps({f: [sha, True, len(data)] for f in files}, separators=(",", ":")).encode()
+    mid = _hl.sha256(man).hexdigest()
+    ent = {"format": 1, "version": "v1.0.0", "level": "start", "bump": "baseline", "summary": "x", "reason": "",
+           "prompt": "", "date": "2026-01-01T00:00:00+00:00", "parent": None, "restored_from": None, "by": "start",
+           "manifest": entry_manifest or mid, "changes": {"added": [], "modified": [], "deleted": []}, "skipped": []}
+    with zipfile.ZipFile(str(path), "w") as z:
+        z.writestr(".ai-versions/config.json", json.dumps({"format": 1, "only": []}))
+        z.writestr(".ai-versions/manifests/%s.json" % mid, man)
+        z.writestr(".ai-versions/objects/%s/%s" % (sha[:2], sha[2:]), _zl.compress(data))
+        z.writestr(".ai-versions/entries/v1.0.0.json", json.dumps(ent))
+
+tricks = [".git./hooks/post-checkout", ".git /hooks/pre-commit", ".GIT/hooks/pre-commit", "sub/.git/config",
+          ".claude./settings.local.json", ".github/skills./x/SKILL.md", "a/.ai-versions/x"]
+if os.name == "nt":
+    tricks.append("GIT~1/hooks/post-checkout")
+for i, trick in enumerate(tricks):
+    E = base / ("evil%d" % i); E.mkdir()
+    subprocess.run(["git", "init", "-q"], cwd=str(E), capture_output=True)
+    evil_backup(base / ("evil%d.zip" % i), [trick])
+    p = run("import", str(base / ("evil%d.zip" % i)), cwd=E, ok=False)
+    planted = [q for q in E.rglob("*") if q.is_file() and "PWNED" in q.read_text(encoding="utf-8", errors="replace")]
+    check("a backup that would write %s is refused" % trick, p.returncode != 0 and not planted, p.stdout + p.stderr)
+E = base / "evil-id"; E.mkdir()
+evil_backup(base / "evil-id.zip", ["ok.txt"], entry_manifest="../../../../outside")
+p = run("import", str(base / "evil-id.zip"), cwd=E, ok=False)
+check("a backup with a fake id is refused", p.returncode != 0 and "Broken version" in p.stderr, p.stderr)
+
+# install-hooks also works when run from the copy inside the history folder
+H2 = base / "hooks-copy"; H2.mkdir()
+subprocess.run(["git", "init", "-q"], cwd=str(H2), capture_output=True)
+w(H2, "a.txt", "a\n"); run("init", cwd=H2)
+p = subprocess.run([PY, str(H2 / ".ai-versions/aiv.py"), "install-hooks", "claude-code"], cwd=str(H2),
+                   capture_output=True, text=True, encoding="utf-8", errors="replace")
+check("install-hooks works from .ai-versions/aiv.py", p.returncode == 0, p.stdout + p.stderr)
+exclude = subprocess.run(["git", "rev-parse", "--git-path", "info/exclude"], cwd=str(H2), capture_output=True, text=True).stdout.strip()
+check("Claude Code's personal settings are kept out of git", "/.claude/settings.local.json" in (H2 / exclude).read_text(encoding="utf-8"))
+
 failed = [n for n, ok in results if not ok]
 print("\n%d/%d passed" % (len(results) - len(failed), len(results)))
 sys.exit(1 if failed else 0)
