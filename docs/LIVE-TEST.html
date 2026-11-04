@@ -15,6 +15,7 @@ section+section{margin-top:40px;border-top:1px solid var(--line)}
 h1{font-size:34px;line-height:1.2;letter-spacing:-.02em;margin:24px 0 12px}
 h2{font-size:23px;line-height:1.3;letter-spacing:-.01em;margin:44px 0 10px}
 h3{font-size:18px;margin:28px 0 8px}
+h4{font-size:16.5px;margin:24px 0 6px}
 p,li{max-width:68ch}
 a{color:var(--accent)}
 ul,ol{padding-left:1.3em}li{margin:4px 0}
@@ -41,160 +42,197 @@ blockquote strong:first-child{color:var(--warn)}
 em{color:var(--muted)}
 @media (max-width:560px){body{font-size:16px}h1{font-size:28px}nav b{width:100%}}
 </style></head><body><nav><div class="in"><b>Live test: Bolt and v0</b><a href="#bolt">Bolt</a><a href="#v0">v0</a><a href="#results">Results</a></div></nav><main><section id="s0"><h1 id="live-test-bolt-and-v0">Live test: Bolt and v0</h1>
-<p>About 45 minutes per builder. Use a <strong>new throwaway project</strong>, not a real one. Fill in the results table at the end and keep the screenshots: they decide whether Bolt and v0 can lose the "beta" label.</p>
-<p><strong>What we're really checking.</strong> The versioning works in simulation. These tests check the four things only a real builder can show:</p>
+<p>This takes about 45 minutes per builder. Use a <strong>new throwaway project</strong>, not a real one.</p>
+<p>Fill in the results table at the end. Keep the screenshots. They decide whether Bolt and v0 can lose the "beta" label.</p>
+<h2 id="what-were-checking">What we're checking</h2>
+<p>The versioning works in simulation (our automated tests). These tests check the four things only a real builder can show.</p>
+<p>Words used below:</p>
+<ul>
+<li>A commit is one saved change on GitHub.</li>
+<li>The robot is the GitHub workflow that saves versions. A workflow is a small program GitHub runs for you.</li>
+</ul>
+<p>The four questions:</p>
 <ol>
-<li>Does the builder pull our robot's commits from GitHub (the version list, and a restore)?</li>
-<li>Does the builder's AI follow the rules (write <code>pending.json</code> with each change, and only <code>restore.json</code> when asked to go back)?</li>
+<li>Does the builder pull (copy in) our robot's commits from GitHub? These commits carry the version list, and a restore.</li>
+<li>Does the builder's AI follow the rules? It should write <code>pending.json</code> with each change. When asked to go back, it should write only <code>restore.json</code>.</li>
 <li>Does the version button show up in the builder's preview?</li>
-<li>When the builder and the robot change things at the same moment, does the builder overwrite the robot's work?</li>
+<li>The builder and the robot may change things at the same moment. When that happens, does the builder overwrite the robot's work?</li>
 </ol>
 <hr />
 <h2 id="bolt">Bolt</h2>
-<h3 id="set-up-about-10-minutes">Set up (about 10 minutes)</h3>
+<h3 id="set-up-about-10-minutes">Set up (about 20 minutes)</h3>
 <ol>
 <li>In Bolt, create a project: "A one-page site for a bakery called Crumb &amp; Co, React + Vite."</li>
-<li>Click the GitHub icon in Bolt and connect it to a <strong>new</strong> repository.</li>
+<li>Click the GitHub icon in Bolt.</li>
+<li>Connect it to a <strong>new</strong> repository. A repository (repo) is a project's folder on GitHub.</li>
 </ol>
-<p class="check"><strong>You should see:</strong> a repo on GitHub with the code, on branch <code>main</code>.</p>
-<ol start="3">
+<p class="check"><strong>You should see:</strong> a repo on GitHub with the code, on branch <code>main</code>. A branch is a separate line of changes inside a repo.</p>
+<ol start="4">
 <li>On GitHub: <strong>Settings → Actions → General → Workflow permissions → Read and write permissions → Save.</strong></li>
-<li>Add the 6 files from the repo's <code>github-layer/copy-paste</code> folder, the same way as the Lovable Pro setup (Step 3), file 6 last. Use the path for file 5 listed in <code>github-layer/README.md</code>.</li>
+<li>Add the 6 files from the repo's <code>github-layer/copy-paste</code> folder. Follow Step 3 of <code>github-layer/README.md</code>, file 6 last. For file 5, use the path listed in <code>github-layer/README.md</code>.</li>
 </ol>
-<p class="check"><strong>You should see:</strong> the Actions tab shows "AI Versions" with a green check, and <code>v1.0.0</code> under Releases.</p>
-<ol start="5">
-<li>Wait 1 minute. <strong>Check:</strong> do the new files appear in Bolt's file tree? (Bolt pulls changes from GitHub regularly.)</li>
-<li>In Bolt: <strong>Project settings → Knowledge</strong>. Paste the text from <code>github-layer/RULES.md</code>.</li>
+<p class="check"><strong>You should see:</strong> the Actions tab (where GitHub shows each workflow run) shows "AI Versions" with a green check. <code>v1.0.0</code> is under Releases.</p>
+<ol start="6">
+<li>Wait 1 minute.</li>
+<li><strong>Check:</strong> do the new files appear in Bolt's file tree? Bolt pulls changes from GitHub regularly.</li>
+<li>In Bolt, open <strong>Project settings → Knowledge</strong>.</li>
+<li>Paste the text from <code>github-layer/RULES.md</code>.</li>
 <li>Send Bolt this message:</li>
 </ol>
 <pre><code class="language-text">In src/App.tsx, add import VersionPill from &quot;./components/VersionPill&quot;; and render &lt;VersionPill /&gt; once, just before the closing tag of the outermost element that App returns. Don't change src/components/VersionPill.tsx.
 </code></pre>
 <p><strong>Check:</strong> the version button appears in the bottom-left of Bolt's preview. If it doesn't, add <code>?versions=on</code> to the preview address and note that.</p>
-<h3 id="tests-about-15-minutes">Tests (about 15 minutes)</h3>
-<p>After each, wait 1 to 2 minutes, then check GitHub <strong>Releases</strong> and the version button.</p>
-<table>
-<thead>
-<tr>
-<th>#</th>
-<th>Do this in Bolt</th>
-<th>Pass if</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>B1</td>
-<td>"Make the heading blue"</td>
-<td>A new version labeled Small tweak. Also open <code>.ai-versions/pending.json</code> in the repo on GitHub: it describes the blue heading</td>
-</tr>
-<tr>
-<td>B2</td>
-<td>"Add a menu section with 4 items and prices"</td>
-<td>A new version labeled New feature</td>
-</tr>
-<tr>
-<td>B3</td>
-<td>Change one line yourself in Bolt's code editor</td>
-<td>A new version labeled Small tweak, even though the AI wrote nothing</td>
-</tr>
-<tr>
-<td>B4</td>
-<td>"Go back to v1.0.1" (use a number from the button)</td>
-<td>Bolt's code goes back within about 2 minutes; button shows Went back; <code>restore.json</code> is gone</td>
-</tr>
-<tr>
-<td>B5</td>
-<td>"Go back to v9.9.9"</td>
-<td>No new version; the button shows a notice that v9.9.9 doesn't exist</td>
-</tr>
-<tr>
-<td>B6</td>
-<td>Make one more change right after B4</td>
-<td>It's numbered after the restore and shows "Built on v1.0.1"</td>
-</tr>
-<tr>
-<td>B7</td>
-<td>Use Bolt's own version history to restore an older version</td>
-<td>GitHub gets a new commit, and it's versioned as Went back</td>
-</tr>
-<tr>
-<td>B8</td>
-<td>Look at GitHub's commit list</td>
-<td>No loop: no new commits for 5 minutes after your last change</td>
-</tr>
-</tbody>
-</table>
+<h3 id="tests-about-15-minutes">Tests (about 25 minutes, mostly waiting)</h3>
+<p>After each test, wait 1 to 2 minutes. Then check GitHub <strong>Releases</strong> and the version button.</p>
+<h4 id="b1-small-tweak">B1. Small tweak</h4>
+<ul>
+<li>Do this: send Bolt "Make the heading blue". Then open <code>.ai-versions/pending.json</code> in the repo on GitHub.</li>
+<li>You should see: a new version, and the file describes the blue heading.</li>
+<li>Pass if: the new version is labeled Small tweak, and the file describes the blue heading.</li>
+<li>Fail if: there is no new version, it has another label, or the file doesn't describe the blue heading.</li>
+</ul>
+<h4 id="b2-new-feature">B2. New feature</h4>
+<ul>
+<li>Do this: send Bolt "Add a menu section with 4 items and prices".</li>
+<li>You should see: a new version.</li>
+<li>Pass if: it is labeled New feature.</li>
+<li>Fail if: there is no new version, or it has another label.</li>
+</ul>
+<h4 id="b3-edit-by-hand">B3. Edit by hand</h4>
+<ul>
+<li>Do this: change one line yourself in Bolt's code editor.</li>
+<li>You should see: a new version, even though the AI wrote nothing.</li>
+<li>Pass if: it is labeled Small tweak.</li>
+<li>Fail if: there is no new version, or it has another label.</li>
+</ul>
+<h4 id="b4-go-back-by-chat">B4. Go back by chat</h4>
+<ul>
+<li>Do this: send Bolt "Go back to v1.0.1". Use a version number from the button.</li>
+<li>You should see: Bolt's code goes back to that version.</li>
+<li>Pass if: Bolt's code goes back within about 2 minutes, the button shows Went back, and <code>restore.json</code> is gone.</li>
+<li>Fail if: the code doesn't go back, it goes back and then returns to the newer code, the button doesn't show Went back, or the file is still there.</li>
+</ul>
+<blockquote>
 <p><strong>Watch for in B4:</strong> Bolt says it keeps its own changes when both sides change at once. If Bolt's code doesn't go back, or goes back and then returns to the newer code, note exactly what you saw. That's the biggest risk for Bolt.</p>
+</blockquote>
+<h4 id="b5-unknown-version">B5. Unknown version</h4>
+<ul>
+<li>Do this: send Bolt "Go back to v9.9.9".</li>
+<li>You should see: a notice in the version button.</li>
+<li>Pass if: there is no new version, and the notice says v9.9.9 doesn't exist.</li>
+<li>Fail if: a new version appears, or there is no notice.</li>
+</ul>
+<h4 id="b6-built-on-label">B6. Built on label</h4>
+<ul>
+<li>Do this: make one more change right after B4.</li>
+<li>You should see: a new version.</li>
+<li>Pass if: it's numbered after the restore and shows "Built on v1.0.1".</li>
+<li>Fail if: it isn't numbered after the restore, or "Built on v1.0.1" is missing.</li>
+</ul>
+<h4 id="b7-bolts-own-restore">B7. Bolt's own restore</h4>
+<ul>
+<li>Do this: use Bolt's own version history to restore an older version.</li>
+<li>You should see: a new commit on GitHub.</li>
+<li>Pass if: GitHub gets a new commit, and it's versioned as Went back.</li>
+<li>Fail if: there is no new commit, or it isn't versioned as Went back.</li>
+</ul>
+<h4 id="b8-no-commit-loop">B8. No commit loop</h4>
+<ul>
+<li>Do this: look at GitHub's commit list.</li>
+<li>You should see: the list stops growing after your last change.</li>
+<li>Pass if: there are no new commits for 5 minutes after your last change.</li>
+<li>Fail if: new commits keep appearing. That is a loop.</li>
+</ul>
 <hr />
 <h2 id="v0">v0</h2>
 <p>v0 commits to its own branch (named like <code>v0/main-abc123</code>), not to <code>main</code>. The version files have to live on that branch.</p>
-<h3 id="set-up-about-10-minutes_1">Set up (about 10 minutes)</h3>
+<h3 id="set-up-about-10-minutes_1">Set up (about 20 minutes)</h3>
 <ol>
 <li>In v0, create a project: "A one-page site for a bakery called Crumb &amp; Co."</li>
-<li>Open v0's <strong>Git</strong> panel and connect a <strong>new</strong> GitHub repository. Write down the branch name v0 shows (for example <code>v0/main-abc123</code>).</li>
+<li>Open v0's <strong>Git</strong> panel.</li>
+<li>Connect a <strong>new</strong> GitHub repository.</li>
+<li>Write down the branch name v0 shows (for example <code>v0/main-abc123</code>).</li>
 <li>On GitHub: <strong>Settings → Actions → General → Workflow permissions → Read and write permissions → Save.</strong></li>
-<li>On GitHub: <strong>Settings → Secrets and variables → Actions → Variables → New repository variable</strong>. Name: <code>AI_VERSIONS_BRANCH</code>. Value: the branch name from step 2.</li>
-<li>On GitHub, switch to <strong>v0's branch</strong> with the branch menu at the top left of the code view. <strong>Add file → Create new file</strong> then saves to the branch you're viewing. Add the 6 files from <code>github-layer/copy-paste</code>, file 6 last. <strong>Put file 5 at</strong> <code>components/VersionPill.tsx</code> (v0 projects keep components at the root).</li>
+<li>On GitHub: <strong>Settings → Secrets and variables → Actions → Variables → New repository variable</strong>. Name: <code>AI_VERSIONS_BRANCH</code>. Value: the branch name from step 4.</li>
+<li>On GitHub, switch to <strong>v0's branch</strong>. Use the branch menu at the top left of the code view. Now <strong>Add file → Create new file</strong> saves to the branch you're viewing.</li>
+<li>Add the 6 files from <code>github-layer/copy-paste</code>, file 6 last. <strong>Put file 5 at</strong> <code>components/VersionPill.tsx</code>. v0 projects keep components at the root.</li>
 </ol>
-<p class="check"><strong>You should see:</strong> the Actions tab shows "AI Versions" with a green check, and <code>v1.0.0</code> under Releases.</p>
-<ol start="6">
-<li><strong>Check:</strong> do the new files appear in v0 within a minute or two? If v0 never pulls them, stop here and note it: everything below depends on it.</li>
-<li>In v0: click <strong>+</strong> in the prompt bar → <strong>Instructions → New Instruction</strong>. Title: <code>ai-versions</code>. Paste the text from <code>github-layer/RULES.md</code>. Make sure the instruction is checked.</li>
+<p class="check"><strong>You should see:</strong> the Actions tab shows "AI Versions" with a green check. <code>v1.0.0</code> is under Releases.</p>
+<ol start="9">
+<li><strong>Check:</strong> do the new files appear in v0 within a minute or two? If v0 never pulls them, stop here and note it. Everything below depends on it.</li>
+<li>In v0, click <strong>+</strong> in the prompt bar, then <strong>Instructions → New Instruction</strong>.</li>
+<li>For the title, type <code>ai-versions</code>.</li>
+<li>Paste the text from <code>github-layer/RULES.md</code>.</li>
+<li>Make sure the instruction is checked.</li>
 <li>Send v0 this message:</li>
 </ol>
 <pre><code class="language-text">In app/layout.tsx, add import VersionPill from &quot;@/components/VersionPill&quot;; and render &lt;VersionPill /&gt; once inside &lt;body&gt;, after {children}. Don't change components/VersionPill.tsx.
 </code></pre>
 <p><strong>Check:</strong> the version button appears in v0's preview. If not, add <code>?versions=on</code> to the preview address and note that.</p>
-<h3 id="tests-about-15-minutes_1">Tests (about 15 minutes)</h3>
-<table>
-<thead>
-<tr>
-<th>#</th>
-<th>Do this in v0</th>
-<th>Pass if</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>V1</td>
-<td>"Make the heading blue"</td>
-<td>A new version labeled Small tweak</td>
-</tr>
-<tr>
-<td>V2</td>
-<td>"Add a menu section with 4 items and prices"</td>
-<td>A new version labeled New feature</td>
-</tr>
-<tr>
-<td>V3</td>
-<td>"Go back to v1.0.1"</td>
-<td>v0's code goes back within about 2 minutes; button shows Went back</td>
-</tr>
-<tr>
-<td>V4</td>
-<td>"Go back to v9.9.9"</td>
-<td>No new version; the button shows a notice</td>
-</tr>
-<tr>
-<td>V5</td>
-<td>One more change after V3</td>
-<td>Numbered after the restore, "Built on v1.0.1"</td>
-</tr>
-<tr>
-<td>V6</td>
-<td>On GitHub, click <strong>Pull requests → New pull request</strong>, choose base <code>main</code> and compare v0's branch, click <strong>Create pull request</strong>, then <strong>Merge pull request</strong></td>
-<td>No red cross in Actions; no new versions appear for the merge</td>
-</tr>
-<tr>
-<td>V7</td>
-<td>Look at the commit list on v0's branch</td>
-<td>No loop: no new commits for 5 minutes after your last change</td>
-</tr>
-</tbody>
-</table>
-<p><strong>Watch for:</strong> if v0 doesn't pull commits made on GitHub, V3 can't work in v0 (the restore never reaches it), and the version button won't update. In that case v0 can still be versioned, but going back would have to be done in v0 itself. Note it; we'd change the docs for v0.</p>
+<h3 id="tests-about-15-minutes_1">Tests (about 25 minutes, mostly waiting)</h3>
+<h4 id="v1-small-tweak">V1. Small tweak</h4>
+<ul>
+<li>Do this: send v0 "Make the heading blue".</li>
+<li>You should see: a new version.</li>
+<li>Pass if: it is labeled Small tweak.</li>
+<li>Fail if: there is no new version, or it has another label.</li>
+</ul>
+<h4 id="v2-new-feature">V2. New feature</h4>
+<ul>
+<li>Do this: send v0 "Add a menu section with 4 items and prices".</li>
+<li>You should see: a new version.</li>
+<li>Pass if: it is labeled New feature.</li>
+<li>Fail if: there is no new version, or it has another label.</li>
+</ul>
+<h4 id="v3-go-back-by-chat">V3. Go back by chat</h4>
+<ul>
+<li>Do this: send v0 "Go back to v1.0.1".</li>
+<li>You should see: v0's code goes back to that version.</li>
+<li>Pass if: v0's code goes back within about 2 minutes, and the button shows Went back.</li>
+<li>Fail if: the code doesn't go back, or the button doesn't show Went back.</li>
+</ul>
+<h4 id="v4-unknown-version">V4. Unknown version</h4>
+<ul>
+<li>Do this: send v0 "Go back to v9.9.9".</li>
+<li>You should see: a notice in the version button.</li>
+<li>Pass if: there is no new version, and the button shows a notice.</li>
+<li>Fail if: a new version appears, or there is no notice.</li>
+</ul>
+<h4 id="v5-built-on-label">V5. Built on label</h4>
+<ul>
+<li>Do this: make one more change after V3.</li>
+<li>You should see: a new version.</li>
+<li>Pass if: it's numbered after the restore and shows "Built on v1.0.1".</li>
+<li>Fail if: it isn't numbered after the restore, or "Built on v1.0.1" is missing.</li>
+</ul>
+<h4 id="v6-merge-to-main">V6. Merge to main</h4>
+<p>A pull request asks GitHub to copy changes from one branch into another. To merge is to do that copy.</p>
+<ul>
+<li>Do this on GitHub:
+<ol>
+<li>Click <strong>Pull requests → New pull request</strong>.</li>
+<li>Choose base <code>main</code> and compare v0's branch.</li>
+<li>Click <strong>Create pull request</strong>.</li>
+<li>Click <strong>Merge pull request</strong>.</li>
+</ol>
+</li>
+<li>You should see: the pull request is merged. Then look at the Actions tab.</li>
+<li>Pass if: there is no red cross in Actions, and no new versions appear for the merge.</li>
+<li>Fail if: Actions shows a red cross, or new versions appear for the merge.</li>
+</ul>
+<h4 id="v7-no-commit-loop">V7. No commit loop</h4>
+<ul>
+<li>Do this: look at the commit list on v0's branch.</li>
+<li>You should see: the list stops growing after your last change.</li>
+<li>Pass if: there are no new commits for 5 minutes after your last change.</li>
+<li>Fail if: new commits keep appearing. That is a loop.</li>
+</ul>
+<blockquote>
+<p><strong>Watch for:</strong> v0 may not pull commits made on GitHub. If so, V3 can't work in v0, because the restore never reaches it. The version button won't update either. v0 can still be versioned, but going back would have to be done in v0 itself. Note it; we'd change the docs for v0.</p>
+</blockquote>
 <hr />
 <h2 id="results">Results</h2>
-<p>Write <strong>Pass</strong>, <strong>Fail</strong> or <strong>N/A</strong> in each cell. Add a screenshot for every Fail.</p>
+<p>Write <strong>Pass</strong>, <strong>Fail</strong> or <strong>N/A</strong> (not applicable) in each cell. Add a screenshot for every Fail.</p>
 <table>
 <thead>
 <tr>
@@ -206,7 +244,7 @@ em{color:var(--muted)}
 </thead>
 <tbody>
 <tr>
-<td>Builder pulls robot commits (set-up step 5 or 6)</td>
+<td>Builder pulls robot commits (Bolt set-up step 7, v0 set-up step 9)</td>
 <td></td>
 <td></td>
 <td></td>
@@ -273,7 +311,13 @@ em{color:var(--muted)}
 </tr>
 </tbody>
 </table>
-<p><strong>Bolt or v0 can drop the "beta" label when:</strong> the builder pulls robot commits, go-back-by-chat works, and nothing loops. Everything else can be a documented limitation.</p></section></main><script>
+<p><strong>Bolt or v0 can drop the "beta" label when</strong> all three of these pass:</p>
+<ul>
+<li>the builder pulls robot commits</li>
+<li>go back by chat works</li>
+<li>nothing loops</li>
+</ul>
+<p>Everything else can be a documented limitation (a known problem we write down in the docs).</p></section></main><script>
 document.querySelectorAll('pre').forEach(pre=>{
   const b=document.createElement('button');b.className='copy';b.type='button';b.textContent='Copy';
   b.onclick=async()=>{const t=pre.querySelector('code').innerText;
