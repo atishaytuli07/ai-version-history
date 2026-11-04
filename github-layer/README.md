@@ -19,11 +19,10 @@ Bolt:
 
 v0:
 
-1. Open the **Git** panel.
-2. Connect a repository.
-3. Write down the branch name v0 shows, for example `v0/main-abc123`.
+1. Connect a repository from the branch menu next to **Publish**, at the top of the chat.
+2. Follow the steps on the screen.
 
-A branch is a separate line of changes inside a repo. v0 usually commits (saves its changes) to its own branch, not to `main`.
+A branch is a separate line of changes inside a repo. v0 makes a new branch for each chat, the first time it changes code. When you click **Publish**, v0 merges that chat's changes into your main branch. With v0, versions are made on your main branch, each time you publish.
 
 **You should see:** your project's code in a repository on GitHub.
 
@@ -38,19 +37,13 @@ A workflow is a small program that GitHub runs for you. This setting lets the ve
 3. Under **Workflow permissions**, choose **Read and write permissions**.
 4. Click **Save**.
 
-v0 only:
-
-5. Click **Settings → Secrets and variables → Actions → Variables → New repository variable**.
-6. For the name, type `AI_VERSIONS_BRANCH`.
-7. For the value, type the branch name from Step 1.
+For v0, don't add an `AI_VERSIONS_BRANCH` variable. Every chat has its own branch, so one branch name would stop working at the next chat.
 
 ---
 
 ## Step 3: Add the 6 files
 
 The files are in the copy-paste folder. To open one on your computer, right-click it and choose **Open with → Notepad** (Windows) or **TextEdit** (Mac).
-
-v0 only: first, switch to v0's branch. Use the branch menu at the top left. New files go to the branch you're viewing.
 
 Add the files in the order of the table. File 6 switches versioning on, so it goes last. For each file:
 
@@ -129,7 +122,7 @@ In app/layout.tsx, add import VersionPill from "@/components/VersionPill"; and r
 
 | What you see | What to do |
 |---|---|
-| No "AI Versions" run in Actions | Check file 6's path. For v0, check that the files are on v0's branch and `AI_VERSIONS_BRANCH` is set. |
+| No "AI Versions" run in Actions | Check file 6's path. For v0, versions are made when you click **Publish**, so check that the change was published. |
 | Red cross with "403" | Do Step 2. Then open the run and click **Re-run jobs**. |
 | No version button | Send Step 5's message again, or add `?versions=on` to the preview address. |
 | Button says "The version list isn't here yet" | Wait for a green check in Actions, then reopen the button. If the message stays, the builder may not be pulling (copying in) changes from GitHub. Please report it. |
@@ -139,6 +132,6 @@ In app/layout.tsx, add import VersionPill from "@/components/VersionPill"; and r
 
 By default, the version button does not show your prompts. This is because your live site serves the version list.
 
-To show them, add a repository variable `AI_VERSIONS_PILL_NOTES` with the value `yes`. Add it the same way as the v0 variable in Step 2.
+To show them, add a repository variable: on GitHub, click **Settings → Secrets and variables → Actions → Variables → New repository variable**. For the name, type `AI_VERSIONS_PILL_NOTES`. For the value, type `yes`.
 
 Your prompts are always in the version tags (labels on each version) and release pages on GitHub.

@@ -60,7 +60,7 @@ em{color:var(--muted)}
 </ol>
 <hr />
 <h2 id="bolt">Bolt</h2>
-<h3 id="set-up-about-10-minutes">Set up (about 20 minutes)</h3>
+<h3 id="set-up-about-20-minutes">Set up (about 20 minutes)</h3>
 <ol>
 <li>In Bolt, create a project: "A one-page site for a bakery called Crumb &amp; Co, React + Vite."</li>
 <li>Click the GitHub icon in Bolt.</li>
@@ -82,7 +82,7 @@ em{color:var(--muted)}
 <pre><code class="language-text">In src/App.tsx, add import VersionPill from &quot;./components/VersionPill&quot;; and render &lt;VersionPill /&gt; once, just before the closing tag of the outermost element that App returns. Don't change src/components/VersionPill.tsx.
 </code></pre>
 <p><strong>Check:</strong> the version button appears in the bottom-left of Bolt's preview. If it doesn't, add <code>?versions=on</code> to the preview address and note that.</p>
-<h3 id="tests-about-15-minutes">Tests (about 25 minutes, mostly waiting)</h3>
+<h3 id="tests-about-25-minutes-mostly-waiting">Tests (about 25 minutes, mostly waiting)</h3>
 <p>After each test, wait 1 to 2 minutes. Then check GitHub <strong>Releases</strong> and the version button.</p>
 <h4 id="b1-small-tweak">B1. Small tweak</h4>
 <ul>
@@ -145,31 +145,30 @@ em{color:var(--muted)}
 </ul>
 <hr />
 <h2 id="v0">v0</h2>
-<p>v0 commits to its own branch (named like <code>v0/main-abc123</code>), not to <code>main</code>. The version files have to live on that branch.</p>
-<h3 id="set-up-about-10-minutes_1">Set up (about 20 minutes)</h3>
+<p>v0 makes a new branch for each chat and merges it into <code>main</code> when you click <strong>Publish</strong>. So with v0, versions are made on <code>main</code>, once per publish. The version files live on <code>main</code>.</p>
+<h3 id="set-up-about-20-minutes_1">Set up (about 20 minutes)</h3>
 <ol>
 <li>In v0, create a project: "A one-page site for a bakery called Crumb &amp; Co."</li>
-<li>Open v0's <strong>Git</strong> panel.</li>
+<li>Open the branch menu next to <strong>Publish</strong>, at the top of the chat.</li>
 <li>Connect a <strong>new</strong> GitHub repository.</li>
-<li>Write down the branch name v0 shows (for example <code>v0/main-abc123</code>).</li>
 <li>On GitHub: <strong>Settings → Actions → General → Workflow permissions → Read and write permissions → Save.</strong></li>
-<li>On GitHub: <strong>Settings → Secrets and variables → Actions → Variables → New repository variable</strong>. Name: <code>AI_VERSIONS_BRANCH</code>. Value: the branch name from step 4.</li>
-<li>On GitHub, switch to <strong>v0's branch</strong>. Use the branch menu at the top left of the code view. Now <strong>Add file → Create new file</strong> saves to the branch you're viewing.</li>
-<li>Add the 6 files from <code>github-layer/copy-paste</code>, file 6 last. <strong>Put file 5 at</strong> <code>components/VersionPill.tsx</code>. v0 projects keep components at the root.</li>
+<li>Don't add an <code>AI_VERSIONS_BRANCH</code> variable.</li>
+<li>On GitHub, stay on <code>main</code>. Add the 6 files from <code>github-layer/copy-paste</code> there, file 6 last, following Step 3 of <code>github-layer/README.md</code>. <strong>Put file 5 at</strong> <code>components/VersionPill.tsx</code>. v0 projects keep components at the root.</li>
 </ol>
 <p class="check"><strong>You should see:</strong> the Actions tab shows "AI Versions" with a green check. <code>v1.0.0</code> is under Releases.</p>
-<ol start="9">
-<li><strong>Check:</strong> do the new files appear in v0 within a minute or two? If v0 never pulls them, stop here and note it. Everything below depends on it.</li>
+<ol start="7">
+<li><strong>Check:</strong> start a new chat in v0 from <code>main</code>. Do the new files appear? If v0 never picks them up, stop here and note it. Everything below depends on it.</li>
 <li>In v0, click <strong>+</strong> in the prompt bar, then <strong>Instructions → New Instruction</strong>.</li>
 <li>For the title, type <code>ai-versions</code>.</li>
 <li>Paste the text from <code>github-layer/RULES.md</code>.</li>
 <li>Make sure the instruction is checked.</li>
-<li>Send v0 this message:</li>
+<li>Send v0 this message, then click <strong>Publish</strong>:</li>
 </ol>
 <pre><code class="language-text">In app/layout.tsx, add import VersionPill from &quot;@/components/VersionPill&quot;; and render &lt;VersionPill /&gt; once inside &lt;body&gt;, after {children}. Don't change components/VersionPill.tsx.
 </code></pre>
 <p><strong>Check:</strong> the version button appears in v0's preview. If not, add <code>?versions=on</code> to the preview address and note that.</p>
-<h3 id="tests-about-15-minutes_1">Tests (about 25 minutes, mostly waiting)</h3>
+<h3 id="tests-about-25-minutes-mostly-waiting_1">Tests (about 25 minutes, mostly waiting)</h3>
+<p>After each change, click <strong>Publish</strong>. Then wait 1 to 2 minutes and check GitHub <strong>Releases</strong> and the version button.</p>
 <h4 id="v1-small-tweak">V1. Small tweak</h4>
 <ul>
 <li>Do this: send v0 "Make the heading blue".</li>
@@ -186,9 +185,9 @@ em{color:var(--muted)}
 </ul>
 <h4 id="v3-go-back-by-chat">V3. Go back by chat</h4>
 <ul>
-<li>Do this: send v0 "Go back to v1.0.1".</li>
-<li>You should see: v0's code goes back to that version.</li>
-<li>Pass if: v0's code goes back within about 2 minutes, and the button shows Went back.</li>
+<li>Do this: send v0 "Go back to v1.0.1", then click <strong>Publish</strong>.</li>
+<li>You should see: the code on <code>main</code> goes back to that version.</li>
+<li>Pass if: the code goes back within about 2 minutes of publishing, and the button shows Went back.</li>
 <li>Fail if: the code doesn't go back, or the button doesn't show Went back.</li>
 </ul>
 <h4 id="v4-unknown-version">V4. Unknown version</h4>
@@ -205,24 +204,16 @@ em{color:var(--muted)}
 <li>Pass if: it's numbered after the restore and shows "Built on v1.0.1".</li>
 <li>Fail if: it isn't numbered after the restore, or "Built on v1.0.1" is missing.</li>
 </ul>
-<h4 id="v6-merge-to-main">V6. Merge to main</h4>
-<p>A pull request asks GitHub to copy changes from one branch into another. To merge is to do that copy.</p>
+<h4 id="v6-one-version-per-publish">V6. One version per publish</h4>
 <ul>
-<li>Do this on GitHub:
-<ol>
-<li>Click <strong>Pull requests → New pull request</strong>.</li>
-<li>Choose base <code>main</code> and compare v0's branch.</li>
-<li>Click <strong>Create pull request</strong>.</li>
-<li>Click <strong>Merge pull request</strong>.</li>
-</ol>
-</li>
-<li>You should see: the pull request is merged. Then look at the Actions tab.</li>
-<li>Pass if: there is no red cross in Actions, and no new versions appear for the merge.</li>
-<li>Fail if: Actions shows a red cross, or new versions appear for the merge.</li>
+<li>Do this: in one chat, send v0 two small changes, then click <strong>Publish</strong> once.</li>
+<li>You should see: v0 merges the chat into <code>main</code>. Then look at the Actions tab and Releases.</li>
+<li>Pass if: there is no red cross in Actions, and the publish made new versions for the changes.</li>
+<li>Fail if: Actions shows a red cross, or no version appears for the publish.</li>
 </ul>
 <h4 id="v7-no-commit-loop">V7. No commit loop</h4>
 <ul>
-<li>Do this: look at the commit list on v0's branch.</li>
+<li>Do this: look at the commit list on <code>main</code>.</li>
 <li>You should see: the list stops growing after your last change.</li>
 <li>Pass if: there are no new commits for 5 minutes after your last change.</li>
 <li>Fail if: new commits keep appearing. That is a loop.</li>
@@ -244,7 +235,7 @@ em{color:var(--muted)}
 </thead>
 <tbody>
 <tr>
-<td>Builder pulls robot commits (Bolt set-up step 7, v0 set-up step 9)</td>
+<td>Builder pulls robot commits (Bolt set-up step 7, v0 set-up step 7)</td>
 <td></td>
 <td></td>
 <td></td>
@@ -298,7 +289,7 @@ em{color:var(--muted)}
 <td></td>
 </tr>
 <tr>
-<td>Merge to main is quiet (V6)</td>
+<td>One version per publish (V6)</td>
 <td>N/A</td>
 <td></td>
 <td></td>

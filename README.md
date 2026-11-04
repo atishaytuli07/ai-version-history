@@ -51,6 +51,8 @@ Run this in your project folder:
 npx skills add atishaytuli07/ai-version-history
 ```
 
+This needs Node.js 22.20 or newer. The skill itself also needs Python 3.8 or newer.
+
 Or copy the `skills/versioning-ai-work` folder into your tool's skills folder. [skills/README.md](skills/README.md) lists the folder for each tool.
 
 Then just ask your AI: "show me the versions", "what changed in v1.3.0?" or "go back to before the redesign".

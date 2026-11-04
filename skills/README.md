@@ -52,13 +52,14 @@ Each tool looks for skills in its own skills folder. Put the folder in the secon
 
 | Tool | Put the folder in | Or for all your projects |
 |---|---|---|
-| Claude (website or app) | Go to **Settings** → **Capabilities** → **Skills**. Click **Upload skill** and choose `versioning-ai-work.zip`. You need a paid plan with code execution turned on. | |
+| Claude (website or app) | Go to **Customize** → **Skills**. Click **+**, then **Create skill**, then **Upload a skill**, and choose `versioning-ai-work.zip`. Works on Free and paid plans. **Code execution and file creation** must be on (in **Settings** → **Capabilities**, it's called **Create and edit files**). | |
 | Claude Code | `.claude/skills/` in your project | `~/.claude/skills/` |
 | Cursor | `.cursor/skills/` | `~/.cursor/skills/` |
 | Codex | `.agents/skills/` | `~/.agents/skills/` |
 | GitHub Copilot | `.github/skills/` | `~/.copilot/skills/` |
 | Gemini CLI | `.gemini/skills/` | `~/.gemini/skills/` |
-| Windsurf (now Devin Desktop) | `.devin/skills/` (older versions: `.windsurf/skills/`) | `~/.codeium/windsurf/skills/` |
+| Windsurf (now Devin Desktop) | `.devin/skills/` (older versions: `.windsurf/skills/`) | `~/.config/devin/skills/` |
+| Replit | `.agents/skills/` | No folder. Add workspace skills in **Settings** → **Customization** → **Skills**. |
 
 Several tools also read `.agents/skills/`. So use that folder for a project you open in more than one tool.
 
@@ -104,7 +105,7 @@ After that, you can ask the builder's own chat to "go back to v3.4.5".
 
 ### Replit
 
-Copy the text of `assets/rules/files-mode-rules.md`. Paste it into the `replit.md` file at your project's root (its top folder).
+Replit Agent reads skills from `.agents/skills/` in your project (see the table above). If you'd rather not add the skill, copy the text of `assets/rules/files-mode-rules.md` and paste it into the `replit.md` file at your project's root (its top folder).
 
 ### Other agents with a rules file
 

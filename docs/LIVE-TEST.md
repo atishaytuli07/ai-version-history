@@ -115,27 +115,25 @@ After each test, wait 1 to 2 minutes. Then check GitHub **Releases** and the ver
 
 ## v0
 
-v0 commits to its own branch (named like `v0/main-abc123`), not to `main`. The version files have to live on that branch.
+v0 makes a new branch for each chat and merges it into `main` when you click **Publish**. So with v0, versions are made on `main`, once per publish. The version files live on `main`.
 
 ### Set up (about 20 minutes)
 
 1. In v0, create a project: "A one-page site for a bakery called Crumb & Co."
-2. Open v0's **Git** panel.
+2. Open the branch menu next to **Publish**, at the top of the chat.
 3. Connect a **new** GitHub repository.
-4. Write down the branch name v0 shows (for example `v0/main-abc123`).
-5. On GitHub: **Settings → Actions → General → Workflow permissions → Read and write permissions → Save.**
-6. On GitHub: **Settings → Secrets and variables → Actions → Variables → New repository variable**. Name: `AI_VERSIONS_BRANCH`. Value: the branch name from step 4.
-7. On GitHub, switch to **v0's branch**. Use the branch menu at the top left of the code view. Now **Add file → Create new file** saves to the branch you're viewing.
-8. Add the 6 files from `github-layer/copy-paste`, file 6 last. **Put file 5 at** `components/VersionPill.tsx`. v0 projects keep components at the root.
+4. On GitHub: **Settings → Actions → General → Workflow permissions → Read and write permissions → Save.**
+5. Don't add an `AI_VERSIONS_BRANCH` variable.
+6. On GitHub, stay on `main`. Add the 6 files from `github-layer/copy-paste` there, file 6 last, following Step 3 of `github-layer/README.md`. **Put file 5 at** `components/VersionPill.tsx`. v0 projects keep components at the root.
 
 **You should see:** the Actions tab shows "AI Versions" with a green check. `v1.0.0` is under Releases.
 
-9. **Check:** do the new files appear in v0 within a minute or two? If v0 never pulls them, stop here and note it. Everything below depends on it.
-10. In v0, click **+** in the prompt bar, then **Instructions → New Instruction**.
-11. For the title, type `ai-versions`.
-12. Paste the text from `github-layer/RULES.md`.
-13. Make sure the instruction is checked.
-14. Send v0 this message:
+7. **Check:** start a new chat in v0 from `main`. Do the new files appear? If v0 never picks them up, stop here and note it. Everything below depends on it.
+8. In v0, click **+** in the prompt bar, then **Instructions → New Instruction**.
+9. For the title, type `ai-versions`.
+10. Paste the text from `github-layer/RULES.md`.
+11. Make sure the instruction is checked.
+12. Send v0 this message, then click **Publish**:
 
 ```text
 In app/layout.tsx, add import VersionPill from "@/components/VersionPill"; and render <VersionPill /> once inside <body>, after {children}. Don't change components/VersionPill.tsx.
@@ -144,6 +142,8 @@ In app/layout.tsx, add import VersionPill from "@/components/VersionPill"; and r
 **Check:** the version button appears in v0's preview. If not, add `?versions=on` to the preview address and note that.
 
 ### Tests (about 25 minutes, mostly waiting)
+
+After each change, click **Publish**. Then wait 1 to 2 minutes and check GitHub **Releases** and the version button.
 
 #### V1. Small tweak
 
@@ -161,9 +161,9 @@ In app/layout.tsx, add import VersionPill from "@/components/VersionPill"; and r
 
 #### V3. Go back by chat
 
-- Do this: send v0 "Go back to v1.0.1".
-- You should see: v0's code goes back to that version.
-- Pass if: v0's code goes back within about 2 minutes, and the button shows Went back.
+- Do this: send v0 "Go back to v1.0.1", then click **Publish**.
+- You should see: the code on `main` goes back to that version.
+- Pass if: the code goes back within about 2 minutes of publishing, and the button shows Went back.
 - Fail if: the code doesn't go back, or the button doesn't show Went back.
 
 #### V4. Unknown version
@@ -180,22 +180,16 @@ In app/layout.tsx, add import VersionPill from "@/components/VersionPill"; and r
 - Pass if: it's numbered after the restore and shows "Built on v1.0.1".
 - Fail if: it isn't numbered after the restore, or "Built on v1.0.1" is missing.
 
-#### V6. Merge to main
+#### V6. One version per publish
 
-A pull request asks GitHub to copy changes from one branch into another. To merge is to do that copy.
-
-- Do this on GitHub:
-  1. Click **Pull requests → New pull request**.
-  2. Choose base `main` and compare v0's branch.
-  3. Click **Create pull request**.
-  4. Click **Merge pull request**.
-- You should see: the pull request is merged. Then look at the Actions tab.
-- Pass if: there is no red cross in Actions, and no new versions appear for the merge.
-- Fail if: Actions shows a red cross, or new versions appear for the merge.
+- Do this: in one chat, send v0 two small changes, then click **Publish** once.
+- You should see: v0 merges the chat into `main`. Then look at the Actions tab and Releases.
+- Pass if: there is no red cross in Actions, and the publish made new versions for the changes.
+- Fail if: Actions shows a red cross, or no version appears for the publish.
 
 #### V7. No commit loop
 
-- Do this: look at the commit list on v0's branch.
+- Do this: look at the commit list on `main`.
 - You should see: the list stops growing after your last change.
 - Pass if: there are no new commits for 5 minutes after your last change.
 - Fail if: new commits keep appearing. That is a loop.
@@ -210,7 +204,7 @@ Write **Pass**, **Fail** or **N/A** (not applicable) in each cell. Add a screens
 
 | Test | Bolt | v0 | Notes / screenshot |
 |---|---|---|---|
-| Builder pulls robot commits (Bolt set-up step 7, v0 set-up step 9) | | | |
+| Builder pulls robot commits (Bolt set-up step 7, v0 set-up step 7) | | | |
 | Version button shows in preview | | | |
 | Small tweak (B1, V1) | | | |
 | New feature (B2, V2) | | | |
@@ -219,7 +213,7 @@ Write **Pass**, **Fail** or **N/A** (not applicable) in each cell. Add a screens
 | Unknown version notice (B5, V4) | | | |
 | Built on label (B6, V5) | | | |
 | Builder's own restore detected (B7) | | N/A | |
-| Merge to main is quiet (V6) | N/A | | |
+| One version per publish (V6) | N/A | | |
 | No commit loop (B8, V7) | | | |
 
 **Bolt or v0 can drop the "beta" label when** all three of these pass:
