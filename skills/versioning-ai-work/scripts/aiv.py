@@ -555,34 +555,75 @@ def auto_summary(ch: dict) -> str:
     return "Unsaved changes in " + head
 
 
-def write_files(store: Store, target: dict, current: dict) -> int:
-    root, n = store.root, 0
+def write_files(store: Store, target: dict, current: dict):
+    """Makes the folder match `target`. Returns (files changed, files kept aside).
+
+    `current` is what the last scan saw, so every file in it is already saved in the history.
+    Anything else in the way (an ignored or too-large file, a link, a folder) is moved to
+    .ai-versions/displaced/ instead of being overwritten or deleted."""
+    root, n, aside = store.root, 0, []
+    stamp = dt.datetime.now().strftime("%Y%m%d-%H%M%S")
     # Never write git internals, the history or AI tool settings, whatever a version lists.
     target = {k: v for k, v in target.items() if safe_rel(k)}
     current = {k: v for k, v in current.items() if safe_rel(k)}
-    for rel, meta in sorted(target.items()):
-        dest = root / rel
-        cur = current.get(rel)
-        if cur and cur["sha"] == meta["sha"] and cur["x"] == meta["x"] and dest.is_file():
-            continue
-        write_atomic(dest, store.read_blob(meta["sha"]))
-        if os.name != "nt":
-            mode = dest.stat().st_mode
-            dest.chmod((mode | 0o111) if meta["x"] else (mode & ~0o111))
-        n += 1
-    for rel in sorted(set(current) - set(target)):
-        p = root / rel
-        if p.is_file() or p.is_symlink():
-            p.unlink()
+
+    def keep_aside(path: Path) -> None:
+        rel = path.relative_to(root).as_posix()
+        dest = store.dir / "displaced" / stamp / rel
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        os.replace(str(path), str(dest))
+        aside.append(rel)
+
+    try:
+        # Delete first: on Windows and macOS "readme.md" and "README.md" are one file, and a file
+        # can't become a folder (or the other way) while the old one is still there.
+        for rel in sorted(set(current) - set(target)):
+            p = root / rel
+            if p.is_file() or p.is_symlink():
+                p.unlink()
+                n += 1
+            parent = p.parent
+            while parent != root:
+                try:
+                    parent.rmdir()
+                except OSError:
+                    break
+                parent = parent.parent
+        for rel, meta in sorted(target.items()):
+            dest = root / rel
+            cur = current.get(rel)
+            if cur and cur["sha"] == meta["sha"] and cur["x"] == meta["x"] and dest.is_file():
+                continue
+            # A file or link where this file's folder should be, e.g. "api" when we need "api/x.js".
+            for parent in reversed(dest.relative_to(root).parents):
+                p = root / parent
+                if str(parent) != "." and (p.is_symlink() or (p.exists() and not p.is_dir())):
+                    keep_aside(p)
+            if dest.is_symlink() or dest.is_dir():
+                keep_aside(dest)
+            elif dest.exists() and rel not in current:
+                keep_aside(dest)  # ignored, too large or otherwise not saved: don't lose it
+            write_atomic(dest, store.read_blob(meta["sha"]))
+            if os.name != "nt":
+                mode = dest.stat().st_mode
+                dest.chmod((mode | 0o111) if meta["x"] else (mode & ~0o111))
             n += 1
-        parent = p.parent
-        while parent != root:
-            try:
-                parent.rmdir()
-            except OSError:
-                break
-            parent = parent.parent
-    return n
+    except OSError as err:
+        raise Fail("Couldn't finish writing the files (%s). Your work from before was saved in the history "
+                   "first, so nothing is lost: run `list` and go back to the newest version." % err)
+    return n, aside
+
+
+def displaced_note(store: Store, aside: list) -> str:
+    """Tells the user where files that were in the way were moved."""
+    if not aside:
+        return ""
+    where = (store.dir / "displaced").relative_to(store.root).as_posix()
+    shown = ", ".join(aside[:5]) + (" (+%d more)" % (len(aside) - 5) if len(aside) > 5 else "")
+    return ("Kept a copy of %d file%s that the history doesn't track, instead of overwriting %s: %s. "
+            "%s in %s/." % (len(aside), "" if len(aside) == 1 else "s",
+                            "it" if len(aside) == 1 else "them", shown,
+                            "It's" if len(aside) == 1 else "They're", where))
 
 
 def built_on(store: Store) -> dict:
@@ -867,10 +908,14 @@ def cmd_restore(args) -> None:
             print("The project already matches %s. Nothing to do." % target["version"])
             return
         ch_out = compare(working, target_files)
-        n = write_files(store, target_files, working)
+        n, aside = write_files(store, target_files, working)
+        if aside:
+            notes.append(displaced_note(store, aside))
         if store.latest()["manifest"] == target["manifest"]:
             print("Wrote back the missing files of %s (%d file%s). It's still the current version, so no new "
                   "version was needed." % (target["version"], n, "" if n == 1 else "s"))
+            for n_ in notes:
+                print(n_)
             return
         after, after_skipped = store.scan()
         summary = "Went back to %s" % target["version"] + (": %s" % clip(args.note, 120) if args.note else "")
@@ -901,7 +946,9 @@ def restore_some(store: Store, target: dict, target_files: dict, working: dict, 
     if not count_changes(ch):
         print("Those files already match %s. Nothing to do." % target["version"])
         return
-    write_files(store, new, working)
+    _, aside = write_files(store, new, working)
+    if aside:
+        notes.append(displaced_note(store, aside))
     after, after_skipped = store.scan()
     names = ch["modified"] + ch["added"] + ch["deleted"]
     shown = ", ".join(p.rsplit("/", 1)[-1] for p in names[:3]) + (" (+%d more)" % (len(names) - 3) if len(names) > 3 else "")
@@ -976,6 +1023,9 @@ def cmd_backup(args) -> None:
     out.parent.mkdir(parents=True, exist_ok=True)
     with zipfile.ZipFile(str(out), "w", zipfile.ZIP_DEFLATED) as z:
         for p in sorted(store.dir.rglob("*")):
+            # displaced/ holds this computer's own safety copies (maybe secrets like .env): never shared
+            if p.relative_to(store.dir).parts[0] == "displaced":
+                continue
             if p.is_file() and p.name not in (".lock", "cache.json", "timeline.html") and not p.name.startswith("."):
                 z.write(str(p), (STORE + "/" + p.relative_to(store.dir).as_posix()))
     print("Backed up %d versions to %s" % (len(store.entries()), out))

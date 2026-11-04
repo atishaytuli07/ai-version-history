@@ -315,6 +315,58 @@ K = base / "lovable"; K.mkdir(); w(K, ".github/workflows/ai-versions.yml", "x");
 p = run("init", cwd=K, ok=False)
 check("projects with the GitHub layer are pointed to pending.json", "pending.json" in p.stderr, p.stderr)
 
+# Going back must never destroy a file the history doesn't hold
+def displaced_files(root):
+    d = root / ".ai-versions/displaced"
+    # compared as text: Path.write_text turns "\n" into "\r\n" on Windows
+    return {p.relative_to(next(d.iterdir())).as_posix(): p.read_bytes().replace(b"\r\n", b"\n")
+            for p in d.rglob("*") if p.is_file()} if d.is_dir() else {}
+
+# a file that became ignored after it was saved (a new secret in .env)
+N = base / "now-ignored"; N.mkdir()
+subprocess.run(["git", "init", "-q"], cwd=str(N), capture_output=True)
+w(N, "app.js", "v1\n"); w(N, ".env", "OLD_KEY=1\n")
+run("init", cwd=N)
+w(N, ".gitignore", ".env\n"); w(N, ".env", "NEW_KEY=secret\n"); w(N, "app.js", "v2\n")
+run("save", "--bump", "patch", "--summary", "ignore env", cwd=N)
+r = run("restore", "v1.0.0", cwd=N)
+check("restore over a now-ignored file keeps the new one aside",
+      (N / ".env").read_text(encoding="utf-8") == "OLD_KEY=1\n" and displaced_files(N).get(".env") == b"NEW_KEY=secret\n", r.stdout)
+check("the user is told where the kept file is", ".ai-versions/displaced" in r.stdout and ".env" in r.stdout, r.stdout)
+bz = base / "now-ignored.zip"
+run("backup", "--out", str(bz), cwd=N)
+check("backups never include kept-aside files", not any("displaced" in n for n in zipfile.ZipFile(str(bz)).namelist()))
+
+# a file that grew past the size limit is not tracked, so it must not be overwritten silently
+Z = base / "big"; Z.mkdir(); w(Z, "data.bin", "small")
+run("init", cwd=Z)
+cfg = json.loads((Z / ".ai-versions/config.json").read_text(encoding="utf-8")); cfg["max_file_mb"] = 0.001
+(Z / ".ai-versions/config.json").write_text(json.dumps(cfg), encoding="utf-8")
+(Z / "data.bin").write_bytes(b"BIG" * 2000)
+run("restore", "v1.0.0", cwd=Z)
+check("restore over a too-large file keeps the large one aside",
+      (Z / "data.bin").read_bytes() == b"small" and displaced_files(Z).get("data.bin") == b"BIG" * 2000)
+
+# a case-only rename, then going back (one file on Windows and macOS, two on Linux)
+C = base / "case"; C.mkdir(); w(C, "README.md", "hello\n"); w(C, "x.txt", "1\n")
+run("init", cwd=C)
+os.rename(str(C / "README.md"), str(C / "tmp-name")); os.rename(str(C / "tmp-name"), str(C / "readme.md")); w(C, "x.txt", "2\n")
+run("save", "--bump", "patch", "--summary", "rename", cwd=C)
+run("restore", "v1.0.0", cwd=C)
+names = sorted(p.name for p in C.iterdir() if p.name != ".ai-versions")
+check("a case-only rename survives going back", names == ["README.md", "x.txt"] and (C / "README.md").read_text(encoding="utf-8") == "hello\n", names)
+
+# a file that became a folder, then going back
+F = base / "swap"; F.mkdir(); w(F, "api", "old api file\n"); w(F, "z.txt", "1\n")
+run("init", cwd=F)
+(F / "api").unlink(); w(F, "api/index.js", "new\n"); w(F, "z.txt", "2\n")
+run("save", "--bump", "minor", "--summary", "api folder", cwd=F)
+p = run("restore", "v1.0.0", cwd=F, ok=False)
+check("going back across a file/folder swap finishes", p.returncode == 0 and (F / "api").is_file()
+      and (F / "api").read_text(encoding="utf-8") == "old api file\n" and (F / "z.txt").read_text(encoding="utf-8") == "1\n", p.stdout + p.stderr)
+run("restore", "v1.1.0", cwd=F)
+check("and back again to the folder version", (F / "api/index.js").read_text(encoding="utf-8") == "new\n")
+
 failed = [n for n, ok in results if not ok]
 print("\n%d/%d passed" % (len(results) - len(failed), len(results)))
 sys.exit(1 if failed else 0)
