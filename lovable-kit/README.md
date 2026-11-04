@@ -42,7 +42,7 @@ Pick one per project. If you already use GitHub, pick Pro.
 
 ## Get the kit
 
-1. Download the kit as a ZIP file. On GitHub: open the repository, click **Code → Download ZIP**.
+1. Download the kit as a ZIP file. On GitHub: open [the repository](https://github.com/atishaytuli07/ai-version-history), click **Code → Download ZIP**.
 2. Unzip it (double-click the file).
 3. Open the `lovable-kit` folder and double-click **START-HERE.html**. It opens in your browser, with every step on one page and **Copy** buttons for every message and file.
 

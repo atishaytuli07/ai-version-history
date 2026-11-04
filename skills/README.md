@@ -35,7 +35,7 @@ Going back never deletes a version. Unsaved work is saved first, and going back 
 
 ## Install
 
-First get the files: on GitHub, open the repository and click **Code → Download ZIP**, then unzip it. The skill is the **versioning-ai-work** folder inside `skills/`.
+First get the files: on GitHub, open [the repository](https://github.com/atishaytuli07/ai-version-history) and click **Code → Download ZIP**, then unzip it. The skill is the **versioning-ai-work** folder inside `skills/`.
 
 Copy that whole folder, not just one file: it contains the program that saves versions.
 
