@@ -1,0 +1,41 @@
+# Gives every change pushed to one branch its own permanent version tag and
+# release page, then refreshes public/ai-versions.json for the in-app version pill.
+# The branch is the repo's default branch (Lovable, Bolt), unless you set the
+# repository variable AI_VERSIONS_BRANCH (for v0: the branch v0 commits to).
+name: AI Versions
+
+on:
+  push:
+    branches: ['**']
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ai-versions
+  cancel-in-progress: false
+
+jobs:
+  version:
+    if: github.ref_name == (vars.AI_VERSIONS_BRANCH || github.event.repository.default_branch)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          fetch-depth: 0
+          ref: ${{ github.sha }}
+
+      - name: Version every change
+        env:
+          AFTER: ${{ github.sha }}
+          BRANCH: ${{ vars.AI_VERSIONS_BRANCH || github.event.repository.default_branch }}
+          GH_TOKEN: ${{ github.token }}
+          # Prompts in the version button are off by default, because your live site serves the list.
+          # To show them: Settings -> Secrets and variables -> Actions -> Variables -> AI_VERSIONS_PILL_NOTES = yes
+          PILL_NOTES: ${{ vars.AI_VERSIONS_PILL_NOTES || 'no' }}
+        run: |
+          git config user.name "ai-versions[bot]"
+          git config user.email "ai-versions@users.noreply.github.com"
+          git fetch --tags --force --quiet
+          cp .github/scripts/ai-version.mjs "$RUNNER_TEMP/"
+          node "$RUNNER_TEMP/ai-version.mjs"

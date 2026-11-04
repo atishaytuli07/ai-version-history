@@ -1,0 +1,283 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Live test: Bolt and v0</title><style>
+:root{--bg:#ffffff;--ink:#1d2433;--muted:#5b6475;--line:#e4e7ec;--soft:#f5f7fa;--accent:#0f766e;--accent-soft:#e7f5f3;--warn:#b45309;--warn-soft:#fdf4e7;--code:#f3f4f7}
+@media (prefers-color-scheme:dark){:root{--bg:#121417;--ink:#e8eaee;--muted:#a3abb8;--line:#2a2f37;--soft:#1a1d22;--accent:#3cc4b6;--accent-soft:#14302d;--warn:#f0a35a;--warn-soft:#33240f;--code:#1d2127}}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:72px}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+nav{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+nav .in{max-width:760px;margin:0 auto;padding:12px 20px;display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+nav b{margin-right:10px;font-size:15px}
+nav a{font-size:14px;color:var(--muted);text-decoration:none;padding:5px 10px;border-radius:999px}
+nav a:hover,nav a:focus-visible{background:var(--soft);color:var(--ink);outline:none}
+main{max-width:760px;margin:0 auto;padding:8px 20px 96px}
+section{padding-top:28px}
+section+section{margin-top:40px;border-top:1px solid var(--line)}
+h1{font-size:34px;line-height:1.2;letter-spacing:-.02em;margin:24px 0 12px}
+h2{font-size:23px;line-height:1.3;letter-spacing:-.01em;margin:44px 0 10px}
+h3{font-size:18px;margin:28px 0 8px}
+p,li{max-width:68ch}
+a{color:var(--accent)}
+ul,ol{padding-left:1.3em}li{margin:4px 0}
+hr{border:0;margin:0}
+img{max-width:100%;height:auto;border:1px solid var(--line);border-radius:12px;margin:12px 0}
+code{font:0.88em ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;background:var(--code);padding:2px 6px;border-radius:6px;overflow-wrap:anywhere}
+pre{position:relative;background:var(--code);border-radius:12px;padding:16px 18px;overflow-x:auto;margin:14px 0}
+pre code{background:none;padding:0;font-size:14.5px;line-height:1.6;white-space:pre-wrap}
+td code{white-space:nowrap;overflow-wrap:normal}
+.copy{position:absolute;top:8px;right:8px;font:600 12.5px system-ui,sans-serif;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:4px 10px;cursor:pointer}
+.copy:hover{border-color:var(--muted)}
+pre.has-copy{padding-right:78px}
+table{border-collapse:collapse;width:100%;margin:14px 0;font-size:15.5px;display:block;overflow-x:auto}
+th,td{text-align:left;vertical-align:top;padding:9px 12px;border-bottom:1px solid var(--line)}
+th{font-size:13px;color:var(--muted);font-weight:600}
+details.file{margin:8px 0;border:1px solid var(--line);border-radius:10px;padding:8px 14px}
+details.file summary{cursor:pointer;font-size:15.5px}
+details.file[open] summary{margin-bottom:6px}
+details.file pre{max-height:380px;overflow:auto;margin:6px 0}
+p.check{background:var(--accent-soft);border-radius:10px;padding:10px 14px}
+p.check strong:first-child{color:var(--accent)}
+blockquote{margin:14px 0;background:var(--warn-soft);border-radius:10px;padding:2px 14px}
+blockquote strong:first-child{color:var(--warn)}
+em{color:var(--muted)}
+@media (max-width:560px){body{font-size:16px}h1{font-size:28px}nav b{width:100%}}
+</style></head><body><nav><div class="in"><b>Live test: Bolt and v0</b><a href="#bolt">Bolt</a><a href="#v0">v0</a><a href="#results">Results</a></div></nav><main><section id="s0"><h1 id="live-test-bolt-and-v0">Live test: Bolt and v0</h1>
+<p>About 45 minutes per builder. Use a <strong>new throwaway project</strong>, not a real one. Fill in the results table at the end and keep the screenshots: they decide whether Bolt and v0 can lose the "beta" label.</p>
+<p><strong>What we're really checking.</strong> The versioning works in simulation. These tests check the four things only a real builder can show:</p>
+<ol>
+<li>Does the builder pull our robot's commits from GitHub (the version list, and a restore)?</li>
+<li>Does the builder's AI follow the rules (write <code>pending.json</code> with each change, and only <code>restore.json</code> when asked to go back)?</li>
+<li>Does the version button show up in the builder's preview?</li>
+<li>When the builder and the robot change things at the same moment, does the builder overwrite the robot's work?</li>
+</ol>
+<hr />
+<h2 id="bolt">Bolt</h2>
+<h3 id="set-up-about-10-minutes">Set up (about 10 minutes)</h3>
+<ol>
+<li>In Bolt, create a project: "A one-page site for a bakery called Crumb &amp; Co, React + Vite."</li>
+<li>Click the GitHub icon in Bolt and connect it to a <strong>new</strong> repository.</li>
+</ol>
+<p class="check"><strong>You should see:</strong> a repo on GitHub with the code, on branch <code>main</code>.</p>
+<ol start="3">
+<li>On GitHub: <strong>Settings → Actions → General → Workflow permissions → Read and write permissions → Save.</strong></li>
+<li>Add the 6 files from the repo's <code>github-layer/copy-paste</code> folder, the same way as the Lovable Pro setup (Step 3), file 6 last. Use the path for file 5 listed in <code>github-layer/README.md</code>.</li>
+</ol>
+<p class="check"><strong>You should see:</strong> the Actions tab shows "AI Versions" with a green check, and <code>v1.0.0</code> under Releases.</p>
+<ol start="5">
+<li>Wait 1 minute. <strong>Check:</strong> do the new files appear in Bolt's file tree? (Bolt pulls changes from GitHub regularly.)</li>
+<li>In Bolt: <strong>Project settings → Knowledge</strong>. Paste the text from <code>github-layer/RULES.md</code>.</li>
+<li>Send Bolt this message:</li>
+</ol>
+<pre><code class="language-text">In src/App.tsx, add import VersionPill from &quot;./components/VersionPill&quot;; and render &lt;VersionPill /&gt; once, just before the closing tag of the outermost element that App returns. Don't change src/components/VersionPill.tsx.
+</code></pre>
+<p><strong>Check:</strong> the version button appears in the bottom-left of Bolt's preview. If it doesn't, add <code>?versions=on</code> to the preview address and note that.</p>
+<h3 id="tests-about-15-minutes">Tests (about 15 minutes)</h3>
+<p>After each, wait 1 to 2 minutes, then check GitHub <strong>Releases</strong> and the version button.</p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Do this in Bolt</th>
+<th>Pass if</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>B1</td>
+<td>"Make the heading blue"</td>
+<td>A new version labeled Small tweak. Also open <code>.ai-versions/pending.json</code> in the repo on GitHub: it describes the blue heading</td>
+</tr>
+<tr>
+<td>B2</td>
+<td>"Add a menu section with 4 items and prices"</td>
+<td>A new version labeled New feature</td>
+</tr>
+<tr>
+<td>B3</td>
+<td>Change one line yourself in Bolt's code editor</td>
+<td>A new version labeled Small tweak, even though the AI wrote nothing</td>
+</tr>
+<tr>
+<td>B4</td>
+<td>"Go back to v1.0.1" (use a number from the button)</td>
+<td>Bolt's code goes back within about 2 minutes; button shows Went back; <code>restore.json</code> is gone</td>
+</tr>
+<tr>
+<td>B5</td>
+<td>"Go back to v9.9.9"</td>
+<td>No new version; the button shows a notice that v9.9.9 doesn't exist</td>
+</tr>
+<tr>
+<td>B6</td>
+<td>Make one more change right after B4</td>
+<td>It's numbered after the restore and shows "Built on v1.0.1"</td>
+</tr>
+<tr>
+<td>B7</td>
+<td>Use Bolt's own version history to restore an older version</td>
+<td>GitHub gets a new commit, and it's versioned as Went back</td>
+</tr>
+<tr>
+<td>B8</td>
+<td>Look at GitHub's commit list</td>
+<td>No loop: no new commits for 5 minutes after your last change</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Watch for in B4:</strong> Bolt says it keeps its own changes when both sides change at once. If Bolt's code doesn't go back, or goes back and then returns to the newer code, note exactly what you saw. That's the biggest risk for Bolt.</p>
+<hr />
+<h2 id="v0">v0</h2>
+<p>v0 commits to its own branch (named like <code>v0/main-abc123</code>), not to <code>main</code>. The version files have to live on that branch.</p>
+<h3 id="set-up-about-10-minutes_1">Set up (about 10 minutes)</h3>
+<ol>
+<li>In v0, create a project: "A one-page site for a bakery called Crumb &amp; Co."</li>
+<li>Open v0's <strong>Git</strong> panel and connect a <strong>new</strong> GitHub repository. Write down the branch name v0 shows (for example <code>v0/main-abc123</code>).</li>
+<li>On GitHub: <strong>Settings → Actions → General → Workflow permissions → Read and write permissions → Save.</strong></li>
+<li>On GitHub: <strong>Settings → Secrets and variables → Actions → Variables → New repository variable</strong>. Name: <code>AI_VERSIONS_BRANCH</code>. Value: the branch name from step 2.</li>
+<li>On GitHub, switch to <strong>v0's branch</strong> with the branch menu at the top left of the code view. <strong>Add file → Create new file</strong> then saves to the branch you're viewing. Add the 6 files from <code>github-layer/copy-paste</code>, file 6 last. <strong>Put file 5 at</strong> <code>components/VersionPill.tsx</code> (v0 projects keep components at the root).</li>
+</ol>
+<p class="check"><strong>You should see:</strong> the Actions tab shows "AI Versions" with a green check, and <code>v1.0.0</code> under Releases.</p>
+<ol start="6">
+<li><strong>Check:</strong> do the new files appear in v0 within a minute or two? If v0 never pulls them, stop here and note it: everything below depends on it.</li>
+<li>In v0: click <strong>+</strong> in the prompt bar → <strong>Instructions → New Instruction</strong>. Title: <code>ai-versions</code>. Paste the text from <code>github-layer/RULES.md</code>. Make sure the instruction is checked.</li>
+<li>Send v0 this message:</li>
+</ol>
+<pre><code class="language-text">In app/layout.tsx, add import VersionPill from &quot;@/components/VersionPill&quot;; and render &lt;VersionPill /&gt; once inside &lt;body&gt;, after {children}. Don't change components/VersionPill.tsx.
+</code></pre>
+<p><strong>Check:</strong> the version button appears in v0's preview. If not, add <code>?versions=on</code> to the preview address and note that.</p>
+<h3 id="tests-about-15-minutes_1">Tests (about 15 minutes)</h3>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Do this in v0</th>
+<th>Pass if</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>V1</td>
+<td>"Make the heading blue"</td>
+<td>A new version labeled Small tweak</td>
+</tr>
+<tr>
+<td>V2</td>
+<td>"Add a menu section with 4 items and prices"</td>
+<td>A new version labeled New feature</td>
+</tr>
+<tr>
+<td>V3</td>
+<td>"Go back to v1.0.1"</td>
+<td>v0's code goes back within about 2 minutes; button shows Went back</td>
+</tr>
+<tr>
+<td>V4</td>
+<td>"Go back to v9.9.9"</td>
+<td>No new version; the button shows a notice</td>
+</tr>
+<tr>
+<td>V5</td>
+<td>One more change after V3</td>
+<td>Numbered after the restore, "Built on v1.0.1"</td>
+</tr>
+<tr>
+<td>V6</td>
+<td>On GitHub, click <strong>Pull requests → New pull request</strong>, choose base <code>main</code> and compare v0's branch, click <strong>Create pull request</strong>, then <strong>Merge pull request</strong></td>
+<td>No red cross in Actions; no new versions appear for the merge</td>
+</tr>
+<tr>
+<td>V7</td>
+<td>Look at the commit list on v0's branch</td>
+<td>No loop: no new commits for 5 minutes after your last change</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Watch for:</strong> if v0 doesn't pull commits made on GitHub, V3 can't work in v0 (the restore never reaches it), and the version button won't update. In that case v0 can still be versioned, but going back would have to be done in v0 itself. Note it; we'd change the docs for v0.</p>
+<hr />
+<h2 id="results">Results</h2>
+<p>Write <strong>Pass</strong>, <strong>Fail</strong> or <strong>N/A</strong> in each cell. Add a screenshot for every Fail.</p>
+<table>
+<thead>
+<tr>
+<th>Test</th>
+<th>Bolt</th>
+<th>v0</th>
+<th>Notes / screenshot</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Builder pulls robot commits (set-up step 5 or 6)</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Version button shows in preview</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Small tweak (B1, V1)</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>New feature (B2, V2)</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Edit by hand gets a version (B3)</td>
+<td></td>
+<td>N/A</td>
+<td></td>
+</tr>
+<tr>
+<td>Go back by chat (B4, V3)</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Unknown version notice (B5, V4)</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Built on label (B6, V5)</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Builder's own restore detected (B7)</td>
+<td></td>
+<td>N/A</td>
+<td></td>
+</tr>
+<tr>
+<td>Merge to main is quiet (V6)</td>
+<td>N/A</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>No commit loop (B8, V7)</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Bolt or v0 can drop the "beta" label when:</strong> the builder pulls robot commits, go-back-by-chat works, and nothing loops. Everything else can be a documented limitation.</p></section></main><script>
+document.querySelectorAll('pre').forEach(pre=>{
+  const b=document.createElement('button');b.className='copy';b.type='button';b.textContent='Copy';
+  b.onclick=async()=>{const t=pre.querySelector('code').innerText;
+    try{await navigator.clipboard.writeText(t)}catch(e){const r=document.createRange();r.selectNodeContents(pre.querySelector('code'));const s=getSelection();s.removeAllRanges();s.addRange(r);document.execCommand('copy');s.removeAllRanges()}
+    b.textContent='Copied';setTimeout(()=>b.textContent='Copy',1500)};
+  pre.classList.add('has-copy');pre.appendChild(b)});
+</script></body></html>

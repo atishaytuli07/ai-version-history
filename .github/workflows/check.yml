@@ -1,0 +1,40 @@
+# Runs the tests on every push and pull request.
+name: Check
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  script:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python: ['3.8', '3.9', '3.10', '3.11', '3.12', '3.13']
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: ${{ matrix.python }}
+      - run: python tests/test_script.py skills/versioning-ai-work/scripts/aiv.py < /dev/null
+
+  github-layer:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+      - run: bash tests/check_copies.sh
+      - run: |
+          mkdir -p /tmp/layer/.github /tmp/layer/.ai-versions
+          cp -R skills/versioning-ai-work/assets/github-layer/github/. /tmp/layer/.github/
+          cp -R skills/versioning-ai-work/assets/github-layer/ai-versions/. /tmp/layer/.ai-versions/
+          python3 tests/test_github_layer.py /tmp/layer < /dev/null
+
+  lite-sql:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+      - run: npm install --no-save @electric-sql/pglite@0.2.17
+      - run: node tests/test_lite_sql.js lovable-kit/lite/copy-paste/1-ai-versions-table.sql

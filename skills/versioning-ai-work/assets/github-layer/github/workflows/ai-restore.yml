@@ -1,0 +1,54 @@
+# Run from GitHub: Actions -> AI Restore -> Run workflow -> type a version.
+# Creates a NEW version whose files match the old one. Nothing is lost.
+name: AI Restore
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to go back to (example: v1.2.0)'
+        required: true
+      note:
+        description: 'Why are you restoring? (optional)'
+        required: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ai-versions
+  cancel-in-progress: false
+
+jobs:
+  restore:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          fetch-depth: 0
+          ref: ${{ vars.AI_VERSIONS_BRANCH || github.event.repository.default_branch }}
+
+      - name: Prepare
+        run: |
+          git config user.name "ai-versions[bot]"
+          git config user.email "ai-versions@users.noreply.github.com"
+          git fetch --tags --force --quiet
+          cp .github/scripts/ai-version.mjs .github/scripts/ai-restore.mjs "$RUNNER_TEMP/"
+
+      - name: Restore files of the chosen version
+        id: restore
+        env:
+          VERSION: ${{ inputs.version }}
+          NOTE: ${{ inputs.note }}
+          BRANCH: ${{ vars.AI_VERSIONS_BRANCH || github.event.repository.default_branch }}
+        run: node "$RUNNER_TEMP/ai-restore.mjs"
+
+      # Pushes made by this workflow don't trigger "AI Versions", so version here.
+      - name: Record the restore as a new version
+        env:
+          BEFORE: ${{ steps.restore.outputs.before }}
+          AFTER: ${{ steps.restore.outputs.after }}
+          BRANCH: ${{ vars.AI_VERSIONS_BRANCH || github.event.repository.default_branch }}
+          GH_TOKEN: ${{ github.token }}
+          PILL_NOTES: ${{ vars.AI_VERSIONS_PILL_NOTES || 'no' }}
+        run: node "$RUNNER_TEMP/ai-version.mjs"

@@ -1,0 +1,6 @@
+{
+  "bump": "patch",
+  "summary": "Switch on AI versioning",
+  "reason": "Setup",
+  "prompt": "Install ai-versions"
+}
