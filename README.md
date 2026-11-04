@@ -3,113 +3,88 @@
 [![Check](https://github.com/atishaytuli07/ai-version-history/actions/workflows/check.yml/badge.svg)](https://github.com/atishaytuli07/ai-version-history/actions/workflows/check.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-Undo AI changes without losing anything. Every change your AI makes gets a readable version number like **v3.4.5**, with the date, a one-line summary and (if you want) the prompt that made it. Open the timeline from your app's preview, and go back to any version by asking in chat.
+Every change your AI makes gets a number, like v3.4.5. You can see when it happened and what changed. If a change breaks something, you go back to an earlier version.
 
-Free and open source. Works in Lovable today, with Bolt and v0 in testing, and as an agent skill for Claude Code, Cursor and other AI coding tools.
+It's free. It works in Lovable now. Bolt and v0 are in testing. There's also a skill for Claude Code, Cursor and other AI coding tools.
 
-![The version button in a Lovable preview, showing v7.1.1, a "Went back" version and a big change, each with its date and prompt](lovable-kit/pill-preview.png)
+![The version button in a Lovable preview: a list of versions, each with its number, date and what changed](lovable-kit/pill-preview.png)
 
-## Why
+## What it does
 
-AI builders already keep a history, but it's hard to use when something breaks:
+- Gives every change a version number.
+- Adds a small button to your preview that lists all your versions.
+- Lets you go back to any version. Going back is saved as a new version, so you can undo it.
+- Can show the prompt that made each change. This is off unless you turn it on.
 
-- Versions have no readable names, so finding "the one before the redesign" means scrolling and guessing.
-- The prompt that made a change usually isn't shown next to it.
-- Coding-agent checkpoints are short-term undo. Claude Code, Cursor and Copilot all say in their own docs to keep using Git for real history.
+Your visitors never see the button. Only you do, in the preview.
 
-This kit puts a number, a date, a summary and the prompt on every change, in one timeline.
-
-## What you get
-
-- **A readable number for every change.** Small tweak `v3.4.5 → v3.4.6`, new feature `→ v3.5.0`, big change `→ v4.0.0`.
-- **A timeline inside your preview.** A small button lists every version. Visitors to your live site don't see it.
-- **Go back by asking.** "Go back to v3.4.5" brings that version back as a new version.
-- **Going back never deletes a version.** Later versions show "Built on v3.4.5", so you always know where you are.
-- **Your prompts, if you want them.** Prompts are off by default, so nothing private ends up on your live site.
-
-## Where it works
-
-| Where you build | Use | Status |
-|---|---|---|
-| Lovable | [`lovable-kit/`](lovable-kit/): Lite (no GitHub) or Pro (GitHub) | Tested live |
-| Bolt | [`github-layer/`](github-layer/) | Beta: not tested live yet |
-| v0 | [`github-layer/`](github-layer/) | Beta: not tested live yet |
-| Claude Code, Cursor, Codex, Copilot, Gemini CLI, Windsurf, Replit, Claude | the skill in [`skills/versioning-ai-work/`](skills/versioning-ai-work/) | Needs Python 3.8+ |
-| ChatGPT, Gemini and other chat apps | [paste-in rules](skills/versioning-ai-work/assets/rules/chat-mode-rules.md) | Copy and paste |
-
-## Quick start
+## Start here
 
 ### Lovable
 
-1. Click **Code → Download ZIP** at the top of this page and unzip it.
-2. Open the `lovable-kit` folder and double-click **START-HERE.html**. It opens in your browser with every step and a **Copy** button for each message and file. (GitHub shows `.html` files as code, so open it from your computer.)
-3. Pick **Lite** (about 10 minutes, no GitHub) or **Pro** (about 15 minutes, uses GitHub) and follow the steps.
+1. At the top of this page, click **Code**, then **Download ZIP**. Unzip the file.
+2. Open the `lovable-kit` folder and double-click `START-HERE.html`. It opens in your browser.
+3. Follow the steps on that page. Each step has a **Copy** button, so you just copy and paste into Lovable.
+
+You'll choose one of two setups:
 
 | | Lite | Pro |
 |---|---|---|
-| Needs GitHub | No | Yes |
-| Where versions are kept | A table in your app's database | Git tags on GitHub |
-| How you go back | Lovable's History; the button tells you which change | Ask in chat: "go back to v3.4.5" |
-| Every change gets a version | Only when Lovable describes the change | Yes |
-| Private | No: anyone with your app's public key can read the list | Yes, in a private repo |
-| Best for | Trying it out, personal and prototype projects | Real projects and anything private |
+| Needs a GitHub account | No | Yes |
+| Time to set up | About 10 minutes | About 15 minutes |
+| How you go back | With Lovable's History button | Type "go back to v3.4.5" in Lovable's chat |
+| Good for | Trying it out, small personal projects | Real projects, private projects |
 
-### Bolt or v0 (beta)
+With Lite, anyone who knows your app's public key can read your version list. Don't use Lite for private work.
 
-Read [`github-layer/README.md`](github-layer/README.md). The checklist used to test it is in [`docs/LIVE-TEST.md`](docs/LIVE-TEST.md).
+### Bolt or v0
 
-### Claude Code, Cursor and other AI coding tools
+This is still being tested. If you want to try it, read [github-layer/README.md](github-layer/README.md).
 
-Install the skill:
+### Claude Code, Cursor and other coding tools
+
+Run this in your project folder:
 
 ```bash
 npx skills add atishaytuli07/ai-version-history
 ```
 
-Or copy the [`skills/versioning-ai-work/`](skills/versioning-ai-work/) folder into your tool's skills folder. The path for each tool is in [`skills/README.md`](skills/README.md). Then talk to your AI normally: "Show me the versions", "What changed in v1.3.0?", "Go back to before the redesign".
+Or copy the `skills/versioning-ai-work` folder into your tool's skills folder. [skills/README.md](skills/README.md) lists the folder for each tool.
 
-## How the numbers work
+Then just ask your AI: "show me the versions", "what changed in v1.3.0?" or "go back to before the redesign".
 
-```text
-v 2 . 4 . 1
-  |   |   |
-  |   |   +--  small tweaks: a colour, some text, a small fix
-  |   +------  new features: a new section, page or form
-  +----------  big changes: a redesign, a new direction
-```
+### ChatGPT, Gemini and other chats
 
-When you go back, the numbers keep going up. On v7.0.0, going back to v3.4.5 gives you v7.1.0 with v3.4.5's code, and v4 to v7 are still there to come back to.
+Copy the text in [chat-mode-rules.md](skills/versioning-ai-work/assets/rules/chat-mode-rules.md) and paste it at the start of a chat. The AI will number each change it makes.
 
-## Good to know
+## What the numbers mean
 
-- **Going back restores code, not data.** Database rows and uploaded files stay as they are, just like with Lovable's and Bolt's own history. If a change added or changed database tables, going back can break the app until you ask the AI to fix the tables.
-- **History stays until you delete it.** In Pro, lock version tags on GitHub to stop them being deleted (rulesets on private repos need a paid GitHub plan), and back up regularly.
-- **Don't go back to a version from before you set the kit up.**
+Take v2.4.1:
 
-## FAQ
+- The first number (2) goes up for a big change, like a redesign.
+- The second number (4) goes up for a new feature, like a new page or section.
+- The last number (1) goes up for a small fix, like new text or a colour.
 
-**How do I undo a change in Lovable?**
-Without the kit: open History from the top bar, pick a version and click Revert. With the kit you also see each version's number, date and prompt, and in Pro you can go back by asking in chat.
+## Before you start
+
+- Going back brings back your code, not your data. Rows in your database and uploaded files stay as they are.
+- Don't go back to a version from before you set this up.
+- Keep a backup of anything important. Versions can be deleted, like any file.
+
+## Questions
+
+**How do I undo a change in Lovable without this?**
+Open History in the top bar, pick a version and click Revert.
 
 **Is it free?**
-Yes. It's open source under the MIT license. Pro needs a GitHub account.
+Yes. It's open source under the MIT license.
 
-**Will my visitors see the version button?**
-No. It shows in your preview. Add `?versions=on` to your live site's address to see it there yourself.
+**Where can I read more?**
+There's a full guide, with how to undo changes in each AI tool, at [aibestprompts.in/ai-versions](https://aibestprompts.in/ai-versions).
 
-**Can I use it for ChatGPT or Gemini chats?**
-Yes, with the paste-in rules. The AI numbers each change in the chat so you can ask for any earlier version. Those notes live inside the chat, so save important work outside it too.
-
-**More help:** the full guide, and how to undo changes in each AI tool without the kit, is at [aibestprompts.in/ai-versions](https://aibestprompts.in/ai-versions).
-
-## Testing
-
-Tests run on every push ([`check.yml`](.github/workflows/check.yml)): the skill's script on Python 3.8 to 3.13, the GitHub layer (including restores across workflow changes), the Lite database rules on Postgres, and a check that the copies of the GitHub layer match.
-
-## Contributing and security
-
-Bug reports and ideas are welcome in [Issues](https://github.com/atishaytuli07/ai-version-history/issues). To report a security problem, please don't open a public issue: see [SECURITY.md](SECURITY.md).
+**I found a bug.**
+Please open an [issue](https://github.com/atishaytuli07/ai-version-history/issues). For a security problem, see [SECURITY.md](SECURITY.md) instead.
 
 ## License
 
-[MIT](LICENSE) © 2026 Atishay Tuli
+[MIT](LICENSE). Copyright 2026 Atishay Tuli.

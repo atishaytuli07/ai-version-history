@@ -1,15 +1,19 @@
 # Security
 
-## Reporting a problem
+## Found a security problem?
 
-Please don't report security problems in a public issue. Instead, use GitHub's private reporting: open the **Security** tab of this repository and click **Report a vulnerability**.
+Please don't post it in a public issue. Report it privately instead:
 
-Include what you found, how to reproduce it, and which part of the kit it affects (the Lovable kit, the GitHub layer or the skill). You'll get a reply within a week.
+1. Open the **Security** tab of this repository.
+2. Click **Report a vulnerability**.
+3. Say what you found, how to make it happen, and which part it's in (the Lovable kit, the GitHub files or the skill).
 
-## What the kit can touch
+You'll get a reply within a week.
 
-- **Lovable Lite** writes version rows to a table in your app's database. That table can be read by anyone with your app's public key, so don't use Lite for private work.
-- **The GitHub layer** (Lovable Pro, Bolt, v0) runs GitHub Actions in your repository with permission to push commits and tags.
-- **The skill** runs a Python script on your computer that reads and writes files in your project folder.
+## What this kit can change
 
-Read any file before you add it to your project, as you would with any code you copy from the internet.
+- Lovable Lite saves your version list in a table in your app's database. Anyone with your app's public key can read that table, so don't use Lite for private work.
+- The GitHub files (Lovable Pro, Bolt, v0) run in your repository and can add commits and version tags.
+- The skill runs a small Python program on your computer. It reads and writes files in your project folder.
+
+As with any code you copy from the internet, read a file before you add it to your project.
